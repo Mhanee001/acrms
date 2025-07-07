@@ -46,7 +46,7 @@ const Auth = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (user && !loading) {
-      navigate("/dashboard");
+      navigate("/");
     }
   }, [user, loading, navigate]);
 
@@ -80,7 +80,8 @@ const Auth = () => {
     setIsSubmitting(true);
     const { error } = await signIn(data.email, data.password);
     if (!error) {
-      navigate("/dashboard");
+      // Role-based routing will be handled by the Index component
+      navigate("/");
     }
     setIsSubmitting(false);
   };

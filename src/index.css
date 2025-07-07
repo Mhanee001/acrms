@@ -36,6 +36,11 @@
     --brand-accent: 43 74% 66%;
     --gradient-primary: linear-gradient(135deg, hsl(var(--brand-primary)), hsl(var(--brand-secondary)));
     --gradient-hero: linear-gradient(135deg, hsl(var(--brand-primary) / 0.1), hsl(var(--brand-secondary) / 0.05));
+    
+    /* Animation and Effects */
+    --shadow-glow: 0 0 40px hsl(var(--primary) / 0.15);
+    --shadow-elegant: 0 10px 30px -10px hsl(var(--primary) / 0.2);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
@@ -72,6 +77,93 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Custom animations and effects */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in-up {
+    animation: fade-in-up 0.5s ease-out;
+  }
+  
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+  }
+  
+  .animate-scale-in {
+    animation: scale-in 0.2s ease-out;
+  }
+  
+  .hover-glow {
+    transition: var(--transition-smooth);
+  }
+  
+  .hover-glow:hover {
+    box-shadow: var(--shadow-glow);
+  }
+  
+  .glass-morphism {
+    backdrop-filter: blur(16px) saturate(180%);
+    background-color: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.125);
+  }
+  
+  .skeleton {
+    background: linear-gradient(90deg, 
+      hsl(var(--muted)) 0%, 
+      hsl(var(--muted) / 0.8) 50%, 
+      hsl(var(--muted)) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+  
+  .card-hover {
+    transition: var(--transition-smooth);
+  }
+  
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elegant);
   }
 }
 
