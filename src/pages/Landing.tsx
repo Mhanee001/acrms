@@ -147,7 +147,7 @@ const Landing = () => {
               </CardContent>
             </Card>
           </div>
-        </div>
+        </div> 
       </section>
 
       {/* Testimonials Section */}
