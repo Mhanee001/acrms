@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,15 +19,31 @@ import {
   Clock,
   AlertTriangle,
   CheckCircle,
-  TrendingUp
+  TrendingUp,
+  Activity,
+  Zap,
+  Target
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import Header from "@/components/Header";
+import { useUserRole } from "@/hooks/useUserRole";
+import { Layout } from "@/components/Layout";
 
 const AdminDashboard = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  const { role, loading: roleLoading } = useUserRole();
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !roleLoading) {
+      if (!user) {
+        navigate("/auth");
+      } else if (role !== "admin") {
+        navigate("/dashboard");
+      }
+    }
+  }, [user, role, loading, roleLoading, navigate]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
@@ -158,57 +175,133 @@ const AdminDashboard = () => {
   const pendingRequests = requests.filter(r => r.status === "pending").length;
   const inProgressRequests = requests.filter(r => r.status === "in-progress").length;
 
+  if (loading || roleLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-mesh">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Loading admin dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || role !== "admin") {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="container mx-auto px-4 py-8 animate-fade-in-up">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
-          <p className="text-muted-foreground">
-            Manage users, assign tasks, and oversee operations
+    <Layout showSidebar={true}>
+      <div className="p-6 space-y-8 animate-fade-in-up">
+        {/* Header */}
+        <div className="space-y-2">
+          <h1 className="text-4xl font-bold text-gradient">Admin Dashboard</h1>
+          <p className="text-muted-foreground text-lg">
+            Comprehensive oversight of users, tasks, and system operations
           </p>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid md:grid-cols-4 gap-4 mb-8">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <div className="text-2xl font-bold text-blue-600">{totalUsers}</div>
-              <div className="text-sm text-muted-foreground">Total Users</div>
+        {/* Enhanced Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="card-hover animate-scale-in bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-200 dark:border-blue-800">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Total Users</p>
+                  <p className="text-3xl font-bold text-blue-900 dark:text-blue-100">{totalUsers}</p>
+                  <p className="text-xs text-blue-600 dark:text-blue-400 flex items-center">
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    +12% from last month
+                  </p>
+                </div>
+                <div className="p-3 rounded-full bg-blue-200 dark:bg-blue-800">
+                  <Users className="h-6 w-6 text-blue-700 dark:text-blue-300" />
+                </div>
+              </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="p-6 text-center">
-              <div className="text-2xl font-bold text-green-600">{activeTechnicians}</div>
-              <div className="text-sm text-muted-foreground">Active Technicians</div>
+
+          <Card className="card-hover animate-scale-in bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-green-200 dark:border-green-800" style={{ animationDelay: '100ms' }}>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-green-700 dark:text-green-300">Active Technicians</p>
+                  <p className="text-3xl font-bold text-green-900 dark:text-green-100">{activeTechnicians}</p>
+                  <p className="text-xs text-green-600 dark:text-green-400 flex items-center">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    All available
+                  </p>
+                </div>
+                <div className="p-3 rounded-full bg-green-200 dark:bg-green-800">
+                  <Activity className="h-6 w-6 text-green-700 dark:text-green-300" />
+                </div>
+              </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="p-6 text-center">
-              <div className="text-2xl font-bold text-orange-600">{pendingRequests}</div>
-              <div className="text-sm text-muted-foreground">Pending Requests</div>
+
+          <Card className="card-hover animate-scale-in bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900 border-orange-200 dark:border-orange-800" style={{ animationDelay: '200ms' }}>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-orange-700 dark:text-orange-300">Pending Requests</p>
+                  <p className="text-3xl font-bold text-orange-900 dark:text-orange-100">{pendingRequests}</p>
+                  <p className="text-xs text-orange-600 dark:text-orange-400 flex items-center">
+                    <Clock className="h-3 w-3 mr-1" />
+                    Awaiting assignment
+                  </p>
+                </div>
+                <div className="p-3 rounded-full bg-orange-200 dark:bg-orange-800">
+                  <AlertTriangle className="h-6 w-6 text-orange-700 dark:text-orange-300" />
+                </div>
+              </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="p-6 text-center">
-              <div className="text-2xl font-bold text-purple-600">{inProgressRequests}</div>
-              <div className="text-sm text-muted-foreground">In Progress</div>
+
+          <Card className="card-hover animate-scale-in bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 border-purple-200 dark:border-purple-800" style={{ animationDelay: '300ms' }}>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-purple-700 dark:text-purple-300">In Progress</p>
+                  <p className="text-3xl font-bold text-purple-900 dark:text-purple-100">{inProgressRequests}</p>
+                  <p className="text-xs text-purple-600 dark:text-purple-400 flex items-center">
+                    <Zap className="h-3 w-3 mr-1" />
+                    Being worked on
+                  </p>
+                </div>
+                <div className="p-3 rounded-full bg-purple-200 dark:bg-purple-800">
+                  <Target className="h-6 w-6 text-purple-700 dark:text-purple-300" />
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
 
         <Tabs defaultValue="requests" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="requests">Service Requests</TabsTrigger>
-            <TabsTrigger value="users">User Management</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 bg-muted/50 p-1 rounded-lg">
+            <TabsTrigger 
+              value="requests" 
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-200"
+            >
+              Service Requests
+            </TabsTrigger>
+            <TabsTrigger 
+              value="users"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-200"
+            >
+              User Management
+            </TabsTrigger>
+            <TabsTrigger 
+              value="analytics"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-200"
+            >
+              Analytics
+            </TabsTrigger>
           </TabsList>
 
           {/* Service Requests Tab */}
           <TabsContent value="requests" className="space-y-6">
-            {/* Filters */}
-            <Card>
+            {/* Enhanced Filters */}
+            <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
               <CardContent className="pt-6">
                 <div className="flex flex-col lg:flex-row gap-4">
                   <div className="flex-1">
@@ -241,10 +334,14 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Requests List */}
-            <div className="space-y-4">
-              {filteredRequests.map((request) => (
-                <Card key={request.id} className="card-hover animate-scale-in">
+            {/* Enhanced Requests List */}
+            <div className="grid gap-4">
+              {filteredRequests.map((request, index) => (
+                <Card 
+                  key={request.id} 
+                  className="card-hover animate-scale-in border-border/40 bg-gradient-to-r from-card to-card/80 hover:shadow-lg transition-all duration-300" 
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
                   <CardContent className="pt-6">
                     <div className="flex justify-between items-start mb-4">
                       <div>
@@ -474,8 +571,8 @@ const AdminDashboard = () => {
             </Card>
           </TabsContent>
         </Tabs>
-      </main>
-    </div>
+      </div>
+    </Layout>
   );
 };
 
