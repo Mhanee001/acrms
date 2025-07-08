@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,14 +7,21 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Filter, Calendar, Clock, User } from "lucide-react";
+import { Plus, Search, Filter, Calendar, Clock, User, Wrench, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import Header from "@/components/Header";
+import { Layout } from "@/components/Layout";
 
 const ServiceRequest = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user && !loading) {
+      navigate("/auth");
+    }
+  }, [user, loading, navigate]);
   const [isCreating, setIsCreating] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -95,28 +103,44 @@ const ServiceRequest = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-mesh">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Loading service requests...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="container mx-auto px-4 py-8 animate-fade-in-up">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Service Requests</h1>
-          <p className="text-muted-foreground">
-            Create and track your hardware maintenance requests
+    <Layout showSidebar={true}>
+      <div className="p-6 space-y-8 animate-fade-in-up">
+        {/* Header */}
+        <div className="space-y-2">
+          <h1 className="text-4xl font-bold text-gradient">Service Requests</h1>
+          <p className="text-muted-foreground text-lg">
+            Create and track your hardware maintenance requests with ease
           </p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Create New Request */}
-          <Card className="lg:col-span-1 card-hover">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Plus className="h-5 w-5" />
+          {/* Enhanced Create New Request */}
+          <Card className="lg:col-span-1 card-hover border-border/40 bg-gradient-to-br from-card to-card/80 hover:shadow-lg transition-all duration-300">
+            <CardHeader className="bg-gradient-to-r from-primary/5 to-secondary/5">
+              <CardTitle className="flex items-center space-x-3">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <Wrench className="h-5 w-5 text-primary" />
+                </div>
                 <span>New Request</span>
               </CardTitle>
               <CardDescription>
-                Submit a new service request for your equipment
+                Submit a new service request for your equipment maintenance needs
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -179,10 +203,10 @@ const ServiceRequest = () => {
             </CardContent>
           </Card>
 
-          {/* Existing Requests */}
+          {/* Enhanced Existing Requests */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Filters */}
-            <Card>
+            {/* Enhanced Filters */}
+            <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
               <CardContent className="pt-6">
                 <div className="flex flex-col sm:flex-row gap-4">
                   <div className="flex-1">
@@ -215,19 +239,27 @@ const ServiceRequest = () => {
               </CardContent>
             </Card>
 
-            {/* Requests List */}
-            <div className="space-y-4">
+            {/* Enhanced Requests List */}
+            <div className="grid gap-4">
               {filteredRequests.length === 0 ? (
-                <Card>
+                <Card className="border-border/40 bg-card/50">
                   <CardContent className="pt-6">
-                    <div className="text-center py-8">
-                      <div className="text-muted-foreground">No requests found</div>
+                    <div className="text-center py-12">
+                      <div className="mb-4">
+                        <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto" />
+                      </div>
+                      <div className="text-muted-foreground text-lg mb-2">No requests found</div>
+                      <p className="text-sm text-muted-foreground">Try creating your first service request or adjusting your filters</p>
                     </div>
                   </CardContent>
                 </Card>
               ) : (
-                filteredRequests.map((request) => (
-                  <Card key={request.id} className="card-hover animate-scale-in">
+                filteredRequests.map((request, index) => (
+                  <Card 
+                    key={request.id} 
+                    className="card-hover animate-scale-in border-border/40 bg-gradient-to-r from-card to-card/80 hover:shadow-lg transition-all duration-300" 
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
                     <CardContent className="pt-6">
                       <div className="flex justify-between items-start mb-4">
                         <div>
@@ -273,8 +305,8 @@ const ServiceRequest = () => {
             </div>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </Layout>
   );
 };
 
