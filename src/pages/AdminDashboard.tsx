@@ -36,7 +36,7 @@ const AdminDashboard = () => {
     {
       id: "1",
       name: "John Smith",
-      email: "john.smith@abelov.com",
+      email: "john.smith@acrms.com",
       role: "technician",
       status: "active",
       lastActive: "2024-01-16",
@@ -46,7 +46,7 @@ const AdminDashboard = () => {
     {
       id: "2", 
       name: "Sarah Johnson",
-      email: "sarah.j@abelov.com",
+      email: "sarah.j@acrms.com",
       role: "technician",
       status: "active",
       lastActive: "2024-01-16",

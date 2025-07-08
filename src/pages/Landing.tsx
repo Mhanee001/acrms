@@ -9,7 +9,7 @@ const testimonials = [
     role: "Operations Manager, TechFix",
     image: "https://images.unsplash.com/photo-1511367461989-f85a21fda167?auto=format&fit=facearea&w=256&h=256&q=80",
     quote:
-      "Abelov transformed our workflow. Our technicians are more efficient and our customers are happier than ever!",
+      "ACRMS transformed our workflow. Our technicians are more efficient and our customers are happier than ever!",
     rating: 5,
   },
   {
@@ -25,7 +25,7 @@ const testimonials = [
     role: "Lead Technician, FixItAll",
     image: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=facearea&w=256&h=256&q=80",
     quote:
-      "Role management and notifications keep our team organized. Abelov is the best platform we've used.",
+      "Role management and notifications keep our team organized. ACRMS is the best platform we've used.",
     rating: 5,
   },
 ];
@@ -38,7 +38,10 @@ const Landing = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Wrench className="h-8 w-8 text-primary" />
+            <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
+                    <Wrench className="h-5 w-5 text-white" />
+                  </div>
+                               
               <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary-foreground bg-clip-text text-transparent">
                 ACRMS
               </h1>
@@ -89,7 +92,7 @@ const Landing = () => {
       <section className="py-20 px-4 bg-secondary/30">
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h3 className="text-3xl font-bold mb-4">Why Choose Abelov?</h3>
+            <h3 className="text-3xl font-bold mb-4">Why Choose ACRMS?</h3>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Built specifically for hardware maintenance companies, our platform provides everything you need to grow your business.
             </p>
@@ -153,7 +156,7 @@ const Landing = () => {
           <div className="text-center mb-16">
             <h3 className="text-3xl font-bold mb-4">What Our Clients Say</h3>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              See how Abelov
+              See how ACRMS
                is making a difference for hardware maintenance businesses.
             </p>
           </div>
@@ -181,7 +184,7 @@ const Landing = () => {
           <div className="max-w-3xl mx-auto">
             <h3 className="text-3xl font-bold mb-6">Ready to Transform Your Business?</h3>
             <p className="text-lg text-muted-foreground mb-8">
-              Join hundreds of hardware maintenance companies that trust Abelov to streamline their operations.
+              Join hundreds of hardware maintenance companies that trust ACRMS to streamline their operations.
             </p>
             <Button size="lg" asChild className="group">
               <Link to="/auth?mode=signup">
@@ -198,9 +201,9 @@ const Landing = () => {
         <div className="container mx-auto text-center text-muted-foreground">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <Wrench className="h-5 w-5 text-primary" />
-            <span className="font-semibold">Abelov</span>
+            <span className="font-semibold">ACRMS</span>
           </div>
-          <p>&copy; 2024 Abelov. All rights reserved. Professional hardware maintenance solutions.</p>
+          <p>&copy; 2024 ACRMS. All rights reserved. Professional hardware maintenance solutions.</p>
         </div>
       </footer> */}
        
@@ -251,7 +254,7 @@ const Landing = () => {
           </div>
           
           <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row items-center justify-between">
-            <p className="text-slate-400">&copy; 2024 Abelov. All rights reserved.</p>
+            <p className="text-slate-400">&copy; 2024 ACRMS. All rights reserved.</p>
             <div className="flex items-center space-x-6 mt-4 md:mt-0">
               <a href="#" className="text-slate-400 hover:text-white transition-colors">Privacy Policy</a>
               <a href="#" className="text-slate-400 hover:text-white transition-colors">Terms of Service</a>
