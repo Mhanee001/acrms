@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import Landing from "./Landing";
+import Device from "./Device";
 
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
