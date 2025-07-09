@@ -113,16 +113,17 @@ const Auth = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Header */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center space-x-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
+        <div className="relative mb-8">
+          <Link
+            to="/"
+            className="absolute left-0 top-1 inline-flex items-center space-x-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            style={{ zIndex: 2 }}
+          >
             <ArrowLeft className="h-4 w-4" />
-            <span>Back to Home</span>
+            <span className="text-sm">Back to Home</span>
           </Link>
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <Wrench className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary-foreground bg-clip-text text-transparent">
-              Abelov
-            </h1>
+            
           </div>
         </div>
 
@@ -134,7 +135,7 @@ const Auth = () => {
               {mode === "forgot" && "Reset Password"}
             </CardTitle>
             <CardDescription>
-              {mode === "login" && "Sign in to your Abelov account"}
+              {mode === "login" && "Sign in to your ACRMS account"}
               {mode === "signup" && "Get started with your hardware maintenance CRM"}
               {mode === "forgot" && "Enter your email to receive a password reset link"}
             </CardDescription>
