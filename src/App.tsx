@@ -10,6 +10,12 @@ import Dashboard from "./pages/Dashboard";
 import ServiceRequest from "./pages/ServiceRequest";
 import TechnicianDashboard from "./pages/TechnicianDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import MyRequests from "./pages/MyRequests";
+import MyAssets from "./pages/MyAssets";
+import Notifications from "./pages/Notifications";
+import ActivityPage from "./pages/ActivityPage";
+import JobRequests from "./pages/JobRequests";
+import UserManagement from "./pages/UserManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +34,13 @@ const App = () => (
             <Route path="/service-request" element={<ServiceRequest />} />
             <Route path="/technician-dashboard" element={<TechnicianDashboard />} />
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
+            <Route path="/my-requests" element={<MyRequests />} />
+            <Route path="/my-assets" element={<MyAssets />} />
+            <Route path="/notifications" element={<Notifications />} />
+            <Route path="/activity" element={<ActivityPage />} />
+            <Route path="/job-requests" element={<JobRequests />} />
+            <Route path="/admin-requests" element={<MyRequests />} />
+            <Route path="/user-management" element={<UserManagement />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
