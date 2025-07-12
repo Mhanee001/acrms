@@ -33,11 +33,11 @@ interface ServiceRequest {
   created_at: string;
   user_id: string;
   assigned_technician_id: string | null;
-  profiles: {
+  profiles?: {
     first_name: string | null;
     last_name: string | null;
     email: string;
-  };
+  } | null;
 }
 
 export const ServiceRequestsList = () => {
@@ -86,7 +86,7 @@ export const ServiceRequestsList = () => {
         return;
       }
 
-      setRequests(data || []);
+      setRequests((data as unknown as ServiceRequest[]) || []);
     } catch (error) {
       console.error('Error fetching service requests:', error);
     } finally {

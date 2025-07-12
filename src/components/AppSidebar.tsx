@@ -10,7 +10,18 @@ import {
   BarChart3,
   FileText,
   LogOut,
-  Home
+  Home,
+  Target,
+  Zap,
+  TrendingUp,
+  Package,
+  Mail,
+  ClipboardList,
+  Briefcase,
+  HardHat,
+  Shield,
+  Activity,
+  Bell
 } from "lucide-react";
 
 import {
@@ -31,40 +42,61 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 
-// Navigation items for different roles
+// CRM Navigation items for different roles
 const getNavigationItems = (role: string | null) => {
-  const commonItems = [
-    { title: "Home", url: "/", icon: Home },
+  const crmItems = [
     { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+    { title: "Contacts", url: "/contacts", icon: Users },
+    { title: "Leads", url: "/leads", icon: Target },
+    { title: "Opportunities", url: "/opportunities", icon: Zap },
+    { title: "Sales Pipeline", url: "/sales-pipeline", icon: TrendingUp },
+    { title: "Products", url: "/products", icon: Package },
+    { title: "Reports", url: "/reports", icon: BarChart3 },
+    { title: "Email Campaigns", url: "/email-campaigns", icon: Mail },
+    { title: "Calendar", url: "/calendar", icon: Calendar },
+  ];
+
+  const serviceItems = [
+    { title: "My Assets", url: "/my-assets", icon: Package },
+    { title: "My Requests", url: "/my-requests", icon: ClipboardList },
+    { title: "Service Request", url: "/service-request", icon: Wrench },
+    { title: "Job Requests", url: "/job-requests", icon: Briefcase },
+  ];
+
+  const adminItems = [
+    { title: "Admin Dashboard", url: "/admin-dashboard", icon: Shield },
+    { title: "User Management", url: "/user-management", icon: Users },
+    { title: "Activity Log", url: "/activity", icon: Activity },
+    { title: "Notifications", url: "/notifications", icon: Bell },
   ];
 
   switch (role) {
     case "admin":
       return [
-        ...commonItems,
-        { title: "Admin Dashboard", url: "/admin-dashboard", icon: BarChart3 },
-        { title: "User Management", url: "/users", icon: Users },
-        { title: "All Requests", url: "/requests", icon: FileText },
-        { title: "Technician Dashboard", url: "/technician-dashboard", icon: UserCheck },
-        { title: "Service Requests", url: "/service-request", icon: Wrench },
-        { title: "Settings", url: "/settings", icon: Settings },
+        ...crmItems,
+        ...serviceItems,
+        { title: "Technician Dashboard", url: "/technician-dashboard", icon: HardHat },
+        ...adminItems,
       ];
     case "technician":
       return [
-        ...commonItems,
-        { title: "Technician Dashboard", url: "/technician-dashboard", icon: UserCheck },
-        { title: "My Jobs", url: "/my-jobs", icon: Wrench },
-        { title: "Service Requests", url: "/service-request", icon: FileText },
-        { title: "Schedule", url: "/schedule", icon: Calendar },
-        { title: "Profile", url: "/profile", icon: Settings },
+        { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+        { title: "Technician Dashboard", url: "/technician-dashboard", icon: HardHat },
+        ...serviceItems,
+        { title: "Calendar", url: "/calendar", icon: Calendar },
+        { title: "Activity Log", url: "/activity", icon: Activity },
+      ];
+    case "sales":
+      return [
+        ...crmItems,
+        { title: "Activity Log", url: "/activity", icon: Activity },
       ];
     case "user":
     default:
       return [
-        ...commonItems,
-        { title: "My Requests", url: "/service-request", icon: FileText },
-        { title: "Create Request", url: "/create-request", icon: Wrench },
-        { title: "Profile", url: "/profile", icon: Settings },
+        { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+        ...serviceItems,
+        { title: "Notifications", url: "/notifications", icon: Bell },
       ];
   }
 };
