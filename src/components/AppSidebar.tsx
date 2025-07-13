@@ -156,8 +156,8 @@ export function AppSidebar() {
           </div>
           {state !== "collapsed" && (
             <div className="animate-fade-in">
-              <h2 className="text-xl font-bold text-gradient">Abelov</h2>
-              <p className="text-xs text-muted-foreground">Hardware CRM</p>
+              <h2 className="text-xl font-bold text-gradient">ACRMS</h2>
+              <p className="text-xs text-muted-foreground">Asset & CRM System</p>
             </div>
           )}
         </div>
