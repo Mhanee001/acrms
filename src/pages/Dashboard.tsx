@@ -22,6 +22,15 @@ const Dashboard = () => {
   const { role, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
 
+  // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL LOGIC OR EARLY RETURNS
+  // Real-time dashboard data will be fetched from the database
+  const [stats, setStats] = useState({
+    activeRequests: 0,
+    completedJobs: 0,
+    pendingReviews: 0,
+    totalSpent: 0
+  });
+
   useEffect(() => {
     if (!user && !loading) {
       navigate("/auth");
@@ -45,29 +54,6 @@ const Dashboard = () => {
     }
   }, [role, roleLoading, user, navigate]);
 
-  if (loading || roleLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-mesh">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground">Loading dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
-
-  // Real-time dashboard data will be fetched from the database
-  const [stats, setStats] = useState({
-    activeRequests: 0,
-    completedJobs: 0,
-    pendingReviews: 0,
-    totalSpent: 0
-  });
-
   // Fetch real dashboard data
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -89,6 +75,22 @@ const Dashboard = () => {
 
     fetchDashboardData();
   }, [user]);
+
+  // CONDITIONAL RENDERING AFTER ALL HOOKS ARE CALLED
+  if (loading || roleLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-mesh">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
 
   return (
