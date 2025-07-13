@@ -177,6 +177,7 @@ export type Database = {
           job_type: string
           location: string | null
           priority: string
+          required_specialty: string | null
           scheduled_date: string | null
           status: string
           title: string
@@ -193,6 +194,7 @@ export type Database = {
           job_type: string
           location?: string | null
           priority?: string
+          required_specialty?: string | null
           scheduled_date?: string | null
           status?: string
           title: string
@@ -209,6 +211,7 @@ export type Database = {
           job_type?: string
           location?: string | null
           priority?: string
+          required_specialty?: string | null
           scheduled_date?: string | null
           status?: string
           title?: string
@@ -237,18 +240,21 @@ export type Database = {
           created_at: string
           id: string
           role: Database["public"]["Enums"]["app_role"]
+          specialty: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
           role: Database["public"]["Enums"]["app_role"]
+          specialty?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          specialty?: string | null
           user_id?: string
         }
         Relationships: [

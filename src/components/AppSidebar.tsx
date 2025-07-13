@@ -82,7 +82,7 @@ const getNavigationItems = (role: string | null) => {
       return [
         { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
         { title: "Technician Dashboard", url: "/technician-dashboard", icon: HardHat },
-        ...serviceItems,
+        { title: "Job Requests", url: "/job-requests", icon: Briefcase },
         { title: "Calendar", url: "/calendar", icon: Calendar },
         { title: "Activity Log", url: "/activity", icon: Activity },
       ];
@@ -95,7 +95,9 @@ const getNavigationItems = (role: string | null) => {
     default:
       return [
         { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-        ...serviceItems,
+        { title: "My Assets", url: "/my-assets", icon: Package },
+        { title: "My Requests", url: "/my-requests", icon: ClipboardList },
+        { title: "Service Request", url: "/service-request", icon: Wrench },
         { title: "Notifications", url: "/notifications", icon: Bell },
       ];
   }
@@ -208,37 +210,36 @@ export function AppSidebar() {
         {user && (
           <div className="p-3">
             {state !== "collapsed" ? (
-              <div className="space-y-3">
-                <div className="text-center">
-                  <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-2">
-                    <span className="text-sm font-semibold text-white">
-                      {user.email?.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center">
+                  <Wrench className="h-4 w-4 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium truncate">{user.email}</p>
-                  <p className="text-xs text-muted-foreground capitalize">
-                    {role || 'user'}
-                  </p>
                 </div>
                 <Button 
-                  variant="outline" 
-                  size="sm" 
+                  variant="ghost" 
+                  size="icon" 
                   onClick={handleSignOut}
-                  className="w-full text-xs hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20"
+                  className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
                 >
-                  <LogOut className="h-3 w-3 mr-2" />
-                  Sign Out
+                  <LogOut className="h-3 w-3" />
                 </Button>
               </div>
             ) : (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={handleSignOut}
-                className="w-full h-10 hover:bg-destructive/10 hover:text-destructive"
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
+              <div className="flex flex-col items-center space-y-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center">
+                  <Wrench className="h-4 w-4 text-white" />
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={handleSignOut}
+                  className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <LogOut className="h-3 w-3" />
+                </Button>
+              </div>
             )}
           </div>
         )}
