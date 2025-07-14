@@ -47,7 +47,7 @@ const Landing = () => {
           <img 
             src={heroImage} 
             alt="Professional hardware maintenance" 
-            className="w-full h-full object-cover opacity-20"
+            className="w-full h-full object-cover opacity-50"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/70 to-background/90"></div>
         </div>
