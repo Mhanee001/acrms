@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -36,28 +37,98 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/auth" element={<ProtectedRoute requireAuth={false}><Auth /></ProtectedRoute>} />
             
-            {/* CRM Routes */}
-            <Route path="/contacts" element={<Contacts />} />
-            <Route path="/leads" element={<Leads />} />
-            <Route path="/opportunities" element={<Opportunities />} />
-            <Route path="/sales-pipeline" element={<SalesPipeline />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/email-campaigns" element={<EmailCampaigns />} />
+            {/* Protected Dashboard */}
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
             
-            {/* Service Management */}
-            <Route path="/service-request" element={<ServiceRequest />} />
-            <Route path="/technician-dashboard" element={<TechnicianDashboard />} />
-            <Route path="/admin-dashboard" element={<AdminDashboard />} />
-            <Route path="/my-requests" element={<MyRequests />} />
-            <Route path="/my-assets" element={<MyAssets />} />
-            <Route path="/notifications" element={<Notifications />} />
-            <Route path="/activity" element={<ActivityPage />} />
-            <Route path="/job-requests" element={<JobRequests />} />
-            <Route path="/user-management" element={<UserManagement />} />
+            {/* CRM Routes - Sales team access */}
+            <Route path="/contacts" element={
+              <ProtectedRoute allowedRoles={['admin', 'sales']}>
+                <Contacts />
+              </ProtectedRoute>
+            } />
+            <Route path="/leads" element={
+              <ProtectedRoute allowedRoles={['admin', 'sales']}>
+                <Leads />
+              </ProtectedRoute>
+            } />
+            <Route path="/opportunities" element={
+              <ProtectedRoute allowedRoles={['admin', 'sales']}>
+                <Opportunities />
+              </ProtectedRoute>
+            } />
+            <Route path="/sales-pipeline" element={
+              <ProtectedRoute allowedRoles={['admin', 'sales']}>
+                <SalesPipeline />
+              </ProtectedRoute>
+            } />
+            <Route path="/products" element={
+              <ProtectedRoute allowedRoles={['admin', 'sales']}>
+                <Products />
+              </ProtectedRoute>
+            } />
+            <Route path="/reports" element={
+              <ProtectedRoute allowedRoles={['admin', 'sales']}>
+                <Reports />
+              </ProtectedRoute>
+            } />
+            <Route path="/email-campaigns" element={
+              <ProtectedRoute allowedRoles={['admin', 'sales']}>
+                <EmailCampaigns />
+              </ProtectedRoute>
+            } />
+            
+            {/* Service Management Routes */}
+            <Route path="/service-request" element={
+              <ProtectedRoute allowedRoles={['user', 'admin']}>
+                <ServiceRequest />
+              </ProtectedRoute>
+            } />
+            <Route path="/technician-dashboard" element={
+              <ProtectedRoute allowedRoles={['technician', 'admin']}>
+                <TechnicianDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin-dashboard" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/my-requests" element={
+              <ProtectedRoute allowedRoles={['user', 'admin']}>
+                <MyRequests />
+              </ProtectedRoute>
+            } />
+            <Route path="/my-assets" element={
+              <ProtectedRoute>
+                <MyAssets />
+              </ProtectedRoute>
+            } />
+            <Route path="/notifications" element={
+              <ProtectedRoute>
+                <Notifications />
+              </ProtectedRoute>
+            } />
+            <Route path="/activity" element={
+              <ProtectedRoute>
+                <ActivityPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/job-requests" element={
+              <ProtectedRoute allowedRoles={['technician', 'admin']}>
+                <JobRequests />
+              </ProtectedRoute>
+            } />
+            <Route path="/user-management" element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <UserManagement />
+              </ProtectedRoute>
+            } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
