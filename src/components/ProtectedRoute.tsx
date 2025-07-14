@@ -32,18 +32,24 @@ export const ProtectedRoute = ({
     }
 
     // Check role permissions if specified
-    if (allowedRoles && user && role) {
+    if (allowedRoles && user) {
+      // If role is still loading or null, wait
+      if (role === null) return;
+      
       if (!allowedRoles.includes(role)) {
         // Redirect based on user's actual role
         switch (role) {
           case 'user':
-            navigate('/service-request');
+            navigate('/dashboard');
             break;
           case 'technician':
             navigate('/technician-dashboard');
             break;
           case 'admin':
             navigate('/admin-dashboard');
+            break;
+          case 'sales':
+            navigate('/contacts');
             break;
           default:
             navigate('/dashboard');
