@@ -63,6 +63,10 @@ const getNavigationItems = (role: string | null) => {
     { title: "Job Requests", url: "/job-requests", icon: Briefcase },
   ];
 
+  const inventoryItems = [
+    { title: "Inventory", url: "/inventory", icon: Package },
+  ];
+
   const adminItems = [
     { title: "Admin Dashboard", url: "/admin-dashboard", icon: Shield },
     { title: "User Management", url: "/user-management", icon: Users },
@@ -75,6 +79,7 @@ const getNavigationItems = (role: string | null) => {
       return [
         ...crmItems,
         ...serviceItems,
+        ...inventoryItems,
         { title: "Technician Dashboard", url: "/technician-dashboard", icon: HardHat },
         ...adminItems,
       ];
@@ -83,6 +88,7 @@ const getNavigationItems = (role: string | null) => {
         { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
         { title: "Technician Dashboard", url: "/technician-dashboard", icon: HardHat },
         { title: "Job Requests", url: "/job-requests", icon: Briefcase },
+        ...inventoryItems,
         { title: "Calendar", url: "/calendar", icon: Calendar },
         { title: "Activity Log", url: "/activity", icon: Activity },
       ];

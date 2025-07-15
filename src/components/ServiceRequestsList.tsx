@@ -76,7 +76,22 @@ export const ServiceRequestsList = () => {
       if (role === 'user') {
         query = query.eq('user_id', user.id);
       } else if (role === 'technician') {
-        query = query.or(`assigned_technician_id.eq.${user.id},status.eq.pending`);
+        // For technicians, show only requests that match their specialty or are assigned to them
+        // First get the technician's specialty
+        const { data: userRoleData } = await supabase
+          .from('user_roles')
+          .select('specialty')
+          .eq('user_id', user.id)
+          .single();
+        
+        const technicianSpecialty = userRoleData?.specialty;
+        
+        if (technicianSpecialty) {
+          query = query.or(`assigned_technician_id.eq.${user.id},and(status.eq.pending,required_specialty.eq.${technicianSpecialty})`);
+        } else {
+          // If no specialty, show assigned tasks and all pending requests
+          query = query.or(`assigned_technician_id.eq.${user.id},status.eq.pending`);
+        }
       }
 
       const { data, error } = await query;

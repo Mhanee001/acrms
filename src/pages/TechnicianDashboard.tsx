@@ -25,6 +25,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Layout } from "@/components/Layout";
+import { supabase } from "@/integrations/supabase/client";
 
 const TechnicianDashboard = () => {
   const { user, loading } = useAuth();
@@ -44,78 +45,163 @@ const TechnicianDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("available");
   const [priorityFilter, setPriorityFilter] = useState("all");
+  const [requests, setRequests] = useState<any[]>([]);
+  const [stats, setStats] = useState({
+    availableCount: 0,
+    myTasksCount: 0,
+    urgentCount: 0
+  });
 
-  // Mock data for available requests
-  const [requests] = useState([
-    {
-      id: "REQ-003",
-      title: "Printer Network Configuration",
-      description: "Setup wireless printing for office HP LaserJet",
-      priority: "medium",
-      status: "available",
-      createdAt: "2024-01-16",
-      estimatedTime: "2-3 hours",
-      location: "Downtown Office, Floor 3",
-      customerName: "TechCorp Inc.",
-      customerPhone: "+1 (555) 123-4567",
-      urgency: "this-week"
-    },
-    {
-      id: "REQ-004",
-      title: "Server Maintenance",
-      description: "Monthly server maintenance and backup verification",
-      priority: "high",
-      status: "available",
-      createdAt: "2024-01-15",
-      estimatedTime: "4-6 hours",
-      location: "Data Center Building A",
-      customerName: "SecureData Systems",
-      customerPhone: "+1 (555) 987-6543",
-      urgency: "asap"
-    },
-    {
-      id: "REQ-005",
-      title: "Workstation Setup",
-      description: "Install and configure 5 new workstations with software",
-      priority: "low",
-      status: "assigned",
-      createdAt: "2024-01-14",
-      estimatedTime: "1 day",
-      location: "West Campus, Building 2",
-      customerName: "Creative Agency",
-      customerPhone: "+1 (555) 456-7890",
-      urgency: "can-wait",
-      assignedTo: "current-user"
+  useEffect(() => {
+    if (user && role === 'technician') {
+      fetchRequests();
     }
-  ]);
+  }, [user, role]);
 
-  const handleAcceptRequest = (requestId: string) => {
-    toast({
-      title: "Request Accepted",
-      description: `You have accepted request ${requestId}`,
-    });
+  const fetchRequests = async () => {
+    if (!user) return;
+
+    try {
+      // Get technician's specialty
+      const { data: userRoleData } = await supabase
+        .from('user_roles')
+        .select('specialty')
+        .eq('user_id', user.id)
+        .single();
+
+      const technicianSpecialty = userRoleData?.specialty;
+
+      // Fetch requests based on specialty and assignment
+      let query = supabase
+        .from('service_requests')
+        .select(`
+          *,
+          profiles!service_requests_user_id_fkey (
+            first_name,
+            last_name,
+            email
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (technicianSpecialty) {
+        query = query.or(`assigned_technician_id.eq.${user.id},and(status.eq.pending,required_specialty.eq.${technicianSpecialty})`);
+      } else {
+        query = query.or(`assigned_technician_id.eq.${user.id},status.eq.pending`);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error fetching requests:', error);
+        return;
+      }
+
+      const requestsData = data || [];
+      setRequests(requestsData);
+
+      // Calculate stats
+      const available = requestsData.filter(r => r.status === 'pending').length;
+      const myTasks = requestsData.filter(r => r.assigned_technician_id === user.id).length;
+      const urgent = requestsData.filter(r => r.priority === 'urgent' || r.priority === 'high').length;
+
+      setStats({
+        availableCount: available,
+        myTasksCount: myTasks,
+        urgentCount: urgent
+      });
+
+    } catch (error) {
+      console.error('Error fetching requests:', error);
+    }
   };
 
-  const handleStartWork = (requestId: string) => {
-    toast({
-      title: "Work Started",
-      description: `You have started working on request ${requestId}`,
-    });
+  const handleAcceptRequest = async (requestId: string) => {
+    try {
+      const { error } = await supabase
+        .from('service_requests')
+        .update({ 
+          status: 'assigned', 
+          assigned_technician_id: user?.id 
+        })
+        .eq('id', requestId);
+
+      if (error) throw error;
+
+      // Log activity
+      await supabase.from('activity_logs').insert({
+        user_id: user?.id,
+        action: 'accept_request',
+        description: `Accepted service request`,
+        entity_type: 'service_request',
+        entity_id: requestId
+      });
+
+      toast({
+        title: "Request Accepted",
+        description: `You have accepted request ${requestId}`,
+      });
+
+      fetchRequests();
+    } catch (error) {
+      console.error('Error accepting request:', error);
+      toast({
+        title: "Error",
+        description: "Failed to accept request",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleCompleteWork = (requestId: string) => {
-    toast({
-      title: "Work Completed",
-      description: `Request ${requestId} has been marked as completed`,
-    });
+  const handleStartWork = async (requestId: string) => {
+    try {
+      const { error } = await supabase
+        .from('service_requests')
+        .update({ status: 'in_progress' })
+        .eq('id', requestId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Work Started",
+        description: `You have started working on request ${requestId}`,
+      });
+
+      fetchRequests();
+    } catch (error) {
+      console.error('Error starting work:', error);
+    }
+  };
+
+  const handleCompleteWork = async (requestId: string) => {
+    try {
+      const { error } = await supabase
+        .from('service_requests')
+        .update({ 
+          status: 'completed',
+          completed_at: new Date().toISOString()
+        })
+        .eq('id', requestId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Work Completed",
+        description: `Request ${requestId} has been marked as completed`,
+      });
+
+      fetchRequests();
+    } catch (error) {
+      console.error('Error completing work:', error);
+    }
   };
 
   const filteredRequests = requests.filter(request => {
     const matchesSearch = request.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         request.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         request.customerName.toLowerCase().includes(searchTerm.toLowerCase());
+                         request.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         request.profiles?.email?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || request.status === statusFilter || 
-                         (statusFilter === "my-tasks" && request.assignedTo === "current-user");
+                         (statusFilter === "my-tasks" && request.assigned_technician_id === user?.id);
     const matchesPriority = priorityFilter === "all" || request.priority === priorityFilter;
     return matchesSearch && matchesStatus && matchesPriority;
   });
@@ -139,20 +225,16 @@ const TechnicianDashboard = () => {
   };
 
   const getStatusIcon = (status: string, assignedTo?: string) => {
-    if (assignedTo === "current-user") {
+    if (assignedTo === user?.id) {
       return <CheckCircle className="h-4 w-4 text-green-500" />;
     }
     switch (status) {
-      case "available": return <AlertCircle className="h-4 w-4 text-blue-500" />;
+      case "pending": return <AlertCircle className="h-4 w-4 text-blue-500" />;
       case "assigned": return <PlayCircle className="h-4 w-4 text-orange-500" />;
+      case "in_progress": return <PlayCircle className="h-4 w-4 text-blue-500" />;
       default: return <Clock className="h-4 w-4" />;
     }
   };
-
-  // Quick stats
-  const availableCount = requests.filter(r => r.status === "available").length;
-  const myTasksCount = requests.filter(r => r.assignedTo === "current-user").length;
-  const urgentCount = requests.filter(r => r.urgency === "asap").length;
 
   if (loading || roleLoading) {
     return (
@@ -187,7 +269,7 @@ const TechnicianDashboard = () => {
               <div className="flex items-center justify-between">
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Available Requests</p>
-                  <p className="text-3xl font-bold text-blue-900 dark:text-blue-100">{availableCount}</p>
+                  <p className="text-3xl font-bold text-blue-900 dark:text-blue-100">{stats.availableCount}</p>
                   <p className="text-xs text-blue-600 dark:text-blue-400 flex items-center">
                     <TrendingUp className="h-3 w-3 mr-1" />
                     Ready to accept
@@ -205,7 +287,7 @@ const TechnicianDashboard = () => {
               <div className="flex items-center justify-between">
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-green-700 dark:text-green-300">My Active Tasks</p>
-                  <p className="text-3xl font-bold text-green-900 dark:text-green-100">{myTasksCount}</p>
+                  <p className="text-3xl font-bold text-green-900 dark:text-green-100">{stats.myTasksCount}</p>
                   <p className="text-xs text-green-600 dark:text-green-400 flex items-center">
                     <Activity className="h-3 w-3 mr-1" />
                     In progress
@@ -223,7 +305,7 @@ const TechnicianDashboard = () => {
               <div className="flex items-center justify-between">
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-red-700 dark:text-red-300">Urgent Requests</p>
-                  <p className="text-3xl font-bold text-red-900 dark:text-red-100">{urgentCount}</p>
+                  <p className="text-3xl font-bold text-red-900 dark:text-red-100">{stats.urgentCount}</p>
                   <p className="text-xs text-red-600 dark:text-red-400 flex items-center">
                     <Zap className="h-3 w-3 mr-1" />
                     Needs attention
@@ -320,19 +402,21 @@ const TechnicianDashboard = () => {
                 <CardContent className="pt-6">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center space-x-3">
-                      {getStatusIcon(request.status, request.assignedTo)}
+                      {getStatusIcon(request.status, request.assigned_technician_id)}
                       <div>
                         <h3 className="font-semibold text-lg">{request.title}</h3>
-                        <p className="text-sm text-muted-foreground">#{request.id}</p>
+                        <p className="text-sm text-muted-foreground">#{request.id.slice(0, 8)}</p>
                       </div>
                     </div>
                     <div className="flex space-x-2">
                       <Badge variant={getPriorityColor(request.priority) as any}>
                         {request.priority}
                       </Badge>
-                      <Badge variant={getUrgencyColor(request.urgency) as any}>
-                        {request.urgency}
-                      </Badge>
+                      {request.required_specialty && (
+                        <Badge variant="outline">
+                          {request.required_specialty}
+                        </Badge>
+                      )}
                     </div>
                   </div>
                   
@@ -345,22 +429,27 @@ const TechnicianDashboard = () => {
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2 text-sm">
                         <User className="h-4 w-4" />
-                        <span className="font-medium">{request.customerName}</span>
+                        <span className="font-medium">
+                          {request.profiles?.first_name} {request.profiles?.last_name}
+                        </span>
                       </div>
                       <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                        <Phone className="h-4 w-4" />
-                        <span>{request.customerPhone}</span>
+                        <span>{request.profiles?.email}</span>
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <div className="flex items-center space-x-2 text-sm">
-                        <MapPin className="h-4 w-4" />
-                        <span>{request.location}</span>
-                      </div>
-                      <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                        <Clock className="h-4 w-4" />
-                        <span>Est. {request.estimatedTime}</span>
-                      </div>
+                      {request.location && (
+                        <div className="flex items-center space-x-2 text-sm">
+                          <MapPin className="h-4 w-4" />
+                          <span>{request.location}</span>
+                        </div>
+                      )}
+                      {request.estimated_duration && (
+                        <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                          <Clock className="h-4 w-4" />
+                          <span>Est. {request.estimated_duration}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
@@ -368,12 +457,12 @@ const TechnicianDashboard = () => {
                     <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                       <div className="flex items-center space-x-1">
                         <Calendar className="h-4 w-4" />
-                        <span>{request.createdAt}</span>
+                        <span>{new Date(request.created_at).toLocaleDateString()}</span>
                       </div>
                     </div>
                     
                     <div className="flex space-x-2">
-                      {request.status === "available" && (
+                      {request.status === "pending" && (
                         <Button 
                           size="sm" 
                           onClick={() => handleAcceptRequest(request.id)}
@@ -381,7 +470,7 @@ const TechnicianDashboard = () => {
                           Accept Request
                         </Button>
                       )}
-                      {request.assignedTo === "current-user" && request.status === "assigned" && (
+                      {request.assigned_technician_id === user?.id && request.status === "assigned" && (
                         <Button 
                           size="sm" 
                           onClick={() => handleStartWork(request.id)}
@@ -389,7 +478,7 @@ const TechnicianDashboard = () => {
                           Start Work
                         </Button>
                       )}
-                      {request.assignedTo === "current-user" && request.status === "in-progress" && (
+                      {request.assigned_technician_id === user?.id && request.status === "in_progress" && (
                         <Button 
                           size="sm" 
                           variant="outline"

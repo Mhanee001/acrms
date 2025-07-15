@@ -25,6 +25,7 @@ import Products from "./pages/Products";
 import Reports from "./pages/Reports";
 import EmailCampaigns from "./pages/EmailCampaigns";
 import NotFound from "./pages/NotFound";
+import Calendar from "./pages/Calendar";
 
 const queryClient = new QueryClient();
 
@@ -85,7 +86,7 @@ const App = () => (
             
             {/* Service Management Routes */}
             <Route path="/service-request" element={
-              <ProtectedRoute allowedRoles={['user', 'admin']}>
+              <ProtectedRoute allowedRoles={['user']}>
                 <ServiceRequest />
               </ProtectedRoute>
             } />
@@ -109,6 +110,11 @@ const App = () => (
                 <MyAssets />
               </ProtectedRoute>
             } />
+            <Route path="/inventory" element={
+              <ProtectedRoute allowedRoles={['admin', 'technician']}>
+                <MyAssets />
+              </ProtectedRoute>
+            } />
             <Route path="/notifications" element={
               <ProtectedRoute>
                 <Notifications />
@@ -127,6 +133,11 @@ const App = () => (
             <Route path="/user-management" element={
               <ProtectedRoute allowedRoles={['admin']}>
                 <UserManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="/calendar" element={
+              <ProtectedRoute allowedRoles={['technician', 'admin', 'sales']}>
+                <Calendar />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
