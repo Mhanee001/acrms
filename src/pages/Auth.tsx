@@ -23,7 +23,7 @@ const signupSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  role: z.enum(["user", "admin", "technician"], {
+  role: z.enum(["user", "admin", "technician", "sales"], {
     required_error: "Please select a role",
   }),
 });
@@ -249,6 +249,7 @@ const Auth = () => {
                           <SelectContent>
                             <SelectItem value="user">User</SelectItem>
                             <SelectItem value="technician">Technician</SelectItem>
+                            <SelectItem value="sales">Sales</SelectItem>
                             <SelectItem value="admin">Admin</SelectItem>
                           </SelectContent>
                         </Select>

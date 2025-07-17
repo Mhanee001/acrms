@@ -14,6 +14,131 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          action: string
+          created_at: string
+          description: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          description: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          description?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_activity_logs_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assets: {
+        Row: {
+          asset_type: string
+          created_at: string
+          id: string
+          image_url: string | null
+          location: string | null
+          manufacturer: string | null
+          model: string | null
+          name: string
+          purchase_date: string | null
+          serial_number: string | null
+          specifications: Json | null
+          status: string
+          updated_at: string
+          user_id: string
+          warranty_expires: string | null
+        }
+        Insert: {
+          asset_type: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          manufacturer?: string | null
+          model?: string | null
+          name: string
+          purchase_date?: string | null
+          serial_number?: string | null
+          specifications?: Json | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          warranty_expires?: string | null
+        }
+        Update: {
+          asset_type?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          manufacturer?: string | null
+          model?: string | null
+          name?: string
+          purchase_date?: string | null
+          serial_number?: string | null
+          specifications?: Json | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          warranty_expires?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -41,26 +166,106 @@ export type Database = {
         }
         Relationships: []
       }
+      service_requests: {
+        Row: {
+          assigned_technician_id: string | null
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          estimated_duration: string | null
+          id: string
+          job_type: string
+          location: string | null
+          priority: string
+          required_specialty: string | null
+          scheduled_date: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_technician_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_duration?: string | null
+          id?: string
+          job_type: string
+          location?: string | null
+          priority?: string
+          required_specialty?: string | null
+          scheduled_date?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_technician_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_duration?: string | null
+          id?: string
+          job_type?: string
+          location?: string | null
+          priority?: string
+          required_specialty?: string | null
+          scheduled_date?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_service_requests_assigned_technician_id"
+            columns: ["assigned_technician_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_service_requests_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
           id: string
           role: Database["public"]["Enums"]["app_role"]
+          specialty: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
           role: Database["public"]["Enums"]["app_role"]
+          specialty?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          specialty?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_user_roles_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -76,7 +281,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "user" | "admin" | "technician"
+      app_role: "user" | "admin" | "technician" | "sales"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -204,7 +409,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["user", "admin", "technician"],
+      app_role: ["user", "admin", "technician", "sales"],
     },
   },
 } as const
