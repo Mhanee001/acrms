@@ -13,15 +13,6 @@ const Landing = () => {
       {/* Header */}
       <header className="fixed top-0 w-full z-50 glass-morphism border-b border-border/20">
         <div className="container mx-auto px-4 py-4">
-<<<<<<< Updated upstream
-          <div className="flex items-center justify-between animate-fade-in-down">
-            <div className="flex items-center space-x-3">
-              <div className="animate-pulse-glow">
-                <Wrench className="h-8 w-8 text-primary" />
-              </div>
-              <h1 className="text-3xl font-bold text-gradient">
-                Abelov
-=======
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
             {/* <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg"> */}
@@ -31,7 +22,6 @@ const Landing = () => {
                                
               <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary-foreground bg-clip-text text-transparent">
                 ACRMS
->>>>>>> Stashed changes
               </h1>
             </div>
             <nav className="hidden md:flex items-center space-x-8">
