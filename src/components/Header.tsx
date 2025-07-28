@@ -37,8 +37,8 @@ const Header = () => {
   const { toast } = useToast();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [profileData, setProfileData] = useState({
-    firstName: "John",
-    lastName: "Doe", 
+    firstName: "Abel",
+    lastName: "Victor", 
     email: user?.email || "",
     phone: "+1 (555) 123-4567",
     bio: "Hardware maintenance specialist with 5+ years of experience.",
