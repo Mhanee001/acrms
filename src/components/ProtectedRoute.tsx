@@ -40,19 +40,19 @@ export const ProtectedRoute = ({
         // Redirect based on user's actual role
         switch (role) {
           case 'user':
-            navigate('/dashboard');
+            navigate('/user-dashboard');
             break;
           case 'technician':
             navigate('/technician-dashboard');
             break;
           case 'admin':
-            navigate('/admin-dashboard');
+            navigate('/dashboard');
             break;
           case 'sales':
-            navigate('/contacts');
+            navigate('/user-dashboard');
             break;
           default:
-            navigate('/dashboard');
+            navigate('/user-dashboard');
         }
         return;
       }

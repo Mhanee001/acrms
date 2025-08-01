@@ -17,6 +17,7 @@ import {
   Target
 } from "lucide-react";
 import { useState } from "react";
+import { formatCurrency } from "@/lib/currency";
 
 const Opportunities = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -107,7 +108,7 @@ const Opportunities = () => {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${totalValue.toLocaleString()}</div>
+              <div className="text-2xl font-bold">{formatCurrency(totalValue)}</div>
               <p className="text-xs text-muted-foreground">
                 {opportunities.length} opportunities
               </p>
@@ -119,7 +120,7 @@ const Opportunities = () => {
               <Target className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${Math.round(weightedValue).toLocaleString()}</div>
+              <div className="text-2xl font-bold">{formatCurrency(Math.round(weightedValue))}</div>
               <p className="text-xs text-muted-foreground">
                 Based on probability
               </p>
@@ -143,7 +144,7 @@ const Opportunities = () => {
               <Zap className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${Math.round(totalValue / opportunities.length).toLocaleString()}</div>
+              <div className="text-2xl font-bold">{formatCurrency(Math.round(totalValue / opportunities.length))}</div>
               <p className="text-xs text-muted-foreground">
                 Current pipeline
               </p>
@@ -187,7 +188,7 @@ const Opportunities = () => {
                   <div className="flex items-center space-x-4">
                     <div className="text-right">
                       <div className="text-2xl font-bold text-green-600">
-                        ${opportunity.amount.toLocaleString()}
+                        {formatCurrency(opportunity.amount)}
                       </div>
                       <div className={`text-sm font-medium ${getProbabilityColor(opportunity.probability)}`}>
                         {opportunity.probability}% probability

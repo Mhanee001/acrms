@@ -20,10 +20,10 @@ const Index = () => {
           navigate("/technician-dashboard");
           break;
         case 'admin':
-          navigate("/admin-dashboard");
+          navigate("/dashboard");
           break;
         default:
-          navigate("/dashboard");
+          navigate("/user-dashboard");
       }
     }
   }, [user, authLoading, roleLoading, role, navigate]);

@@ -17,6 +17,7 @@ import {
   Clock
 } from "lucide-react";
 import { useState } from "react";
+import { formatCurrency } from "@/lib/currency";
 
 const Leads = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -120,7 +121,7 @@ const Leads = () => {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">$2.4M</div>
+              <div className="text-2xl font-bold">{formatCurrency(2400000)}</div>
               <p className="text-xs text-muted-foreground">
                 +15% from last month
               </p>
@@ -201,7 +202,7 @@ const Leads = () => {
                   <div className="space-y-2">
                     <h4 className="font-medium text-sm">Deal Value</h4>
                     <div className="text-2xl font-bold text-green-600">
-                      ${lead.value.toLocaleString()}
+                      {formatCurrency(lead.value)}
                     </div>
                     <div className="space-y-1">
                       <div className="flex justify-between text-sm">

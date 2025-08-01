@@ -38,7 +38,7 @@ const TechnicianDashboard = () => {
       if (!user) {
         navigate("/auth");
       } else if (role !== "technician") {
-        navigate("/dashboard");
+        navigate("/user-dashboard");
       }
     }
   }, [user, role, loading, roleLoading, navigate]);

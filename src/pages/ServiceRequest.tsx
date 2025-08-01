@@ -28,7 +28,7 @@ const ServiceRequest = () => {
   // Redirect non-users who try to access this page
   useEffect(() => {
     if (role && role !== 'user') {
-      navigate("/dashboard");
+      navigate("/user-dashboard");
     }
   }, [role, navigate]);
 

@@ -45,7 +45,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 // CRM Navigation items for different roles
 const getNavigationItems = (role: string | null) => {
   const crmItems = [
-    { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+    { title: "Dashboard", url: "/user-dashboard", icon: LayoutDashboard },
     { title: "Contacts", url: "/contacts", icon: Users },
     { title: "Leads", url: "/leads", icon: Target },
     { title: "Opportunities", url: "/opportunities", icon: Zap },
@@ -68,7 +68,6 @@ const getNavigationItems = (role: string | null) => {
   ];
 
   const adminItems = [
-    { title: "Admin Dashboard", url: "/admin-dashboard", icon: Shield },
     { title: "User Management", url: "/user-management", icon: Users },
     { title: "Activity Log", url: "/activity", icon: Activity },
     { title: "Notifications", url: "/notifications", icon: Bell },
@@ -80,12 +79,11 @@ const getNavigationItems = (role: string | null) => {
         ...crmItems,
         ...serviceItems,
         ...inventoryItems,
-        { title: "Technician Dashboard", url: "/technician-dashboard", icon: HardHat },
         ...adminItems,
       ];
     case "technician":
       return [
-        { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+        { title: "Dashboard", url: "/user-dashboard", icon: LayoutDashboard },
         { title: "Technician Dashboard", url: "/technician-dashboard", icon: HardHat },
         { title: "Job Requests", url: "/job-requests", icon: Briefcase },
         ...inventoryItems,
@@ -100,7 +98,7 @@ const getNavigationItems = (role: string | null) => {
     case "user":
     default:
       return [
-        { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+        { title: "Dashboard", url: "/user-dashboard", icon: LayoutDashboard },
         { title: "My Assets", url: "/my-assets", icon: Package },
         { title: "My Requests", url: "/my-requests", icon: ClipboardList },
         { title: "Service Request", url: "/service-request", icon: Wrench },
@@ -163,7 +161,7 @@ export function AppSidebar() {
           {state !== "collapsed" && (
             <div className="animate-fade-in">
               <h2 className="text-xl font-bold text-gradient">ACRMS</h2>
-              <p className="text-xs text-muted-foreground">Asset & CRM System</p>
+              <p className="text-xs text-muted-foreground">Abelov CRMS</p>
             </div>
           )}
         </div>

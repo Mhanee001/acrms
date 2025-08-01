@@ -28,98 +28,114 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Layout } from "@/components/Layout";
+import { supabase } from "@/integrations/supabase/client";
 
 const AdminDashboard = () => {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && !roleLoading) {
+    if (!authLoading && !roleLoading) {
       if (!user) {
         navigate("/auth");
       } else if (role !== "admin") {
         navigate("/dashboard");
       }
     }
-  }, [user, role, loading, roleLoading, navigate]);
+  }, [user, role, authLoading, roleLoading, navigate]);
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
 
-  // Mock data
-  const [users] = useState([
-    {
-      id: "1",
-      name: "John Smith",
-      email: "john.smith@acrms.com",
-      role: "technician",
-      status: "active",
-      lastActive: "2024-01-16",
-      tasksAssigned: 3,
-      tasksCompleted: 15
-    },
-    {
-      id: "2", 
-      name: "Sarah Johnson",
-      email: "sarah.j@acrms.com",
-      role: "technician",
-      status: "active",
-      lastActive: "2024-01-16",
-      tasksAssigned: 2,
-      tasksCompleted: 22
-    },
-    {
-      id: "3",
-      name: "Mike Wilson",
-      email: "mike.w@client.com",
-      role: "user",
-      status: "active",
-      lastActive: "2024-01-15",
-      tasksAssigned: 0,
-      tasksCompleted: 0
+  // Real data from database
+  const [users, setUsers] = useState([]);
+  const [requests, setRequests] = useState([]);
+  const [technicians, setTechnicians] = useState([]);
+
+  useEffect(() => {
+    if (user && role === 'admin') {
+      fetchDashboardData();
     }
-  ]);
+  }, [user, role]);
 
-  const [requests] = useState([
-    {
-      id: "REQ-001",
-      title: "Laptop Screen Repair",
-      customerName: "TechCorp Inc.",
-      priority: "high",
-      status: "pending",
-      assignedTo: null,
-      createdAt: "2024-01-15",
-      estimatedTime: "2-3 hours"
-    },
-    {
-      id: "REQ-002",
-      title: "Network Setup", 
-      customerName: "Creative Agency",
-      priority: "medium",
-      status: "assigned",
-      assignedTo: "John Smith",
-      createdAt: "2024-01-14",
-      estimatedTime: "4-6 hours"
-    },
-    {
-      id: "REQ-003",
-      title: "Server Maintenance",
-      customerName: "SecureData Systems", 
-      priority: "high",
-      status: "in-progress",
-      assignedTo: "Sarah Johnson",
-      createdAt: "2024-01-13",
-      estimatedTime: "1 day"
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch users with roles
+      const { data: usersData, error: usersError } = await supabase
+        .from('profiles')
+        .select(`
+          *,
+          user_roles (
+            role
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      let formattedUsers = [];
+      if (usersError) {
+        console.error('Error fetching users:', usersError);
+      } else {
+        formattedUsers = usersData?.map(profile => ({
+          id: profile.id,
+          name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unnamed User',
+          email: profile.email,
+          role: profile.user_roles?.[0]?.role || 'user',
+          status: 'active',
+          lastActive: new Date(profile.updated_at).toLocaleDateString(),
+          tasksAssigned: 0,
+          tasksCompleted: 0
+        })) || [];
+        setUsers(formattedUsers);
+      }
+
+      // Fetch service requests
+      const { data: requestsData, error: requestsError } = await supabase
+        .from('service_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (requestsError) {
+        console.error('Error fetching requests:', requestsError);
+      } else {
+        const formattedRequests = requestsData?.map(request => ({
+          id: request.id,
+          title: request.title,
+          customerName: 'Customer', // Simplified for now
+          priority: request.priority,
+          status: request.status,
+          assignedTo: null, // Simplified for now
+          createdAt: new Date(request.created_at).toLocaleDateString(),
+          estimatedTime: request.estimated_duration || 'Not specified'
+        })) || [];
+        setRequests(formattedRequests);
+      }
+
+      // Fetch technicians from users with technician role
+      const technicianUsers = formattedUsers.filter(user => user.role === 'technician');
+      setTechnicians(technicianUsers.map(tech => ({
+        id: tech.id,
+        name: tech.name,
+        available: true,
+        currentTasks: 0
+      })));
+
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load dashboard data",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
-  ]);
-
-  const [technicians] = useState([
-    { id: "1", name: "John Smith", available: true, currentTasks: 3 },
-    { id: "2", name: "Sarah Johnson", available: false, currentTasks: 2 },
-    { id: "3", name: "Mike Davis", available: true, currentTasks: 1 }
-  ]);
+  };
 
   const handleAssignRequest = (requestId: string, technicianId: string) => {
     const technician = technicians.find(t => t.id === technicianId);
@@ -175,12 +191,12 @@ const AdminDashboard = () => {
   const pendingRequests = requests.filter(r => r.status === "pending").length;
   const inProgressRequests = requests.filter(r => r.status === "in-progress").length;
 
-  if (loading || roleLoading) {
+  if (loading || roleLoading || authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-mesh">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground">Loading admin dashboard...</p>
+          <p className="text-muted-foreground">Loading dashboard...</p>
         </div>
       </div>
     );
@@ -195,7 +211,7 @@ const AdminDashboard = () => {
       <div className="p-6 space-y-8 animate-fade-in-up">
         {/* Header */}
         <div className="space-y-2">
-          <h1 className="text-4xl font-bold text-gradient">Admin Dashboard</h1>
+          <h1 className="text-4xl font-bold text-gradient">Dashboard</h1>
           <p className="text-muted-foreground text-lg">
             Comprehensive oversight of users, tasks, and system operations
           </p>
