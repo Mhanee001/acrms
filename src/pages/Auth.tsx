@@ -110,68 +110,48 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen hero-bg flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full animate-float"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary/5 rounded-full animate-float" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-accent/3 rounded-full animate-pulse"></div>
-      </div>
-
-      <div className="w-full max-w-md relative z-10">
+    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
         {/* Header */}
-        <div className="relative mb-8 animate-fade-in-down">
+        <div className="relative mb-8">
           <Link
             to="/"
-            className="absolute left-0 top-1 inline-flex items-center space-x-2 text-sm text-muted-foreground hover:text-foreground transition-all duration-300 hover:translate-x-[-4px] group"
+            className="absolute left-0 top-1 inline-flex items-center space-x-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            style={{ zIndex: 2 }}
           >
-            <ArrowLeft className="h-4 w-4 transition-transform group-hover:translate-x-[-2px]" />
+            <ArrowLeft className="h-4 w-4" />
             <span className="text-sm">Back to Home</span>
           </Link>
-          
-          {/* Brand Header */}
-          <div className="flex items-center justify-center space-x-3 mt-12 mb-6">
-            <div className="p-3 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 backdrop-blur-sm animate-pulse-glow">
-              <Wrench className="h-8 w-8 text-primary" />
-            </div>
-            <div className="text-center">
-              <h1 className="text-3xl font-bold text-gradient">acrms</h1>
-              <p className="text-xs text-muted-foreground">Professional CRMS</p>
-            </div>
+          <div className="flex items-center justify-center space-x-2 mb-4">
+            
           </div>
         </div>
 
-        <Card className="glass-card border-0 shadow-2xl animate-scale-in backdrop-blur-xl">
-          <CardHeader className="text-center pb-6">
-            <CardTitle className="text-2xl font-bold mb-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>
               {mode === "login" && "Welcome Back"}
               {mode === "signup" && "Create Account"}
               {mode === "forgot" && "Reset Password"}
             </CardTitle>
-            <CardDescription className="text-base">
+            <CardDescription>
               {mode === "login" && "Sign in to your acrms account"}
               {mode === "signup" && "Get started with your hardware maintenance CRM"}
               {mode === "forgot" && "Enter your email to receive a password reset link"}
             </CardDescription>
           </CardHeader>
-          
-          <CardContent className="space-y-6 px-8 pb-8">
+          <CardContent className="space-y-4">
             {mode === "login" && (
               <Form {...loginForm}>
-                <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-5">
+                <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
                   <FormField
                     control={loginForm.control}
                     name="email"
                     render={({ field }) => (
-                      <FormItem className="space-y-2">
-                        <FormLabel className="text-sm font-medium">Email</FormLabel>
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="email" 
-                            placeholder="Enter your email" 
-                            className="h-12 bg-background/60 border-border/20 backdrop-blur-sm focus:bg-background transition-all duration-300"
-                            {...field} 
-                          />
+                          <Input type="email" placeholder="Enter your email" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -181,33 +161,17 @@ const Auth = () => {
                     control={loginForm.control}
                     name="password"
                     render={({ field }) => (
-                      <FormItem className="space-y-2">
-                        <FormLabel className="text-sm font-medium">Password</FormLabel>
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="password" 
-                            placeholder="Enter your password" 
-                            className="h-12 bg-background/60 border-border/20 backdrop-blur-sm focus:bg-background transition-all duration-300"
-                            {...field} 
-                          />
+                          <Input type="password" placeholder="Enter your password" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <Button 
-                    type="submit" 
-                    className="w-full h-12 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]" 
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <div className="flex items-center space-x-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground"></div>
-                        <span>Signing In...</span>
-                      </div>
-                    ) : (
-                      "Sign In"
-                    )}
+                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting ? "Signing In..." : "Sign In"}
                   </Button>
                 </form>
               </Form>
@@ -215,20 +179,16 @@ const Auth = () => {
 
             {mode === "signup" && (
               <Form {...signupForm}>
-                <form onSubmit={signupForm.handleSubmit(onSignup)} className="space-y-5">
+                <form onSubmit={signupForm.handleSubmit(onSignup)} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={signupForm.control}
                       name="firstName"
                       render={({ field }) => (
-                        <FormItem className="space-y-2">
-                          <FormLabel className="text-sm font-medium">First Name</FormLabel>
+                        <FormItem>
+                          <FormLabel>First Name</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="John" 
-                              className="h-12 bg-background/60 border-border/20 backdrop-blur-sm focus:bg-background transition-all duration-300"
-                              {...field} 
-                            />
+                            <Input placeholder="John" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -238,14 +198,10 @@ const Auth = () => {
                       control={signupForm.control}
                       name="lastName"
                       render={({ field }) => (
-                        <FormItem className="space-y-2">
-                          <FormLabel className="text-sm font-medium">Last Name</FormLabel>
+                        <FormItem>
+                          <FormLabel>Last Name</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="Doe" 
-                              className="h-12 bg-background/60 border-border/20 backdrop-blur-sm focus:bg-background transition-all duration-300"
-                              {...field} 
-                            />
+                            <Input placeholder="Doe" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -256,15 +212,10 @@ const Auth = () => {
                     control={signupForm.control}
                     name="email"
                     render={({ field }) => (
-                      <FormItem className="space-y-2">
-                        <FormLabel className="text-sm font-medium">Email</FormLabel>
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="email" 
-                            placeholder="john@example.com" 
-                            className="h-12 bg-background/60 border-border/20 backdrop-blur-sm focus:bg-background transition-all duration-300"
-                            {...field} 
-                          />
+                          <Input type="email" placeholder="john@example.com" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -274,15 +225,10 @@ const Auth = () => {
                     control={signupForm.control}
                     name="password"
                     render={({ field }) => (
-                      <FormItem className="space-y-2">
-                        <FormLabel className="text-sm font-medium">Password</FormLabel>
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="password" 
-                            placeholder="Create a password" 
-                            className="h-12 bg-background/60 border-border/20 backdrop-blur-sm focus:bg-background transition-all duration-300"
-                            {...field} 
-                          />
+                          <Input type="password" placeholder="Create a password" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -292,15 +238,15 @@ const Auth = () => {
                     control={signupForm.control}
                     name="role"
                     render={({ field }) => (
-                      <FormItem className="space-y-2">
-                        <FormLabel className="text-sm font-medium">Role</FormLabel>
+                      <FormItem>
+                        <FormLabel>Role</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <SelectTrigger className="h-12 bg-background/60 border-border/20 backdrop-blur-sm focus:bg-background transition-all duration-300">
+                            <SelectTrigger>
                               <SelectValue placeholder="Select your role" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="backdrop-blur-xl">
+                          <SelectContent>
                             <SelectItem value="user">User</SelectItem>
                             <SelectItem value="technician">Technician</SelectItem>
                             <SelectItem value="sales">Sales</SelectItem>
@@ -311,19 +257,8 @@ const Auth = () => {
                       </FormItem>
                     )}
                   />
-                  <Button 
-                    type="submit" 
-                    className="w-full h-12 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]" 
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <div className="flex items-center space-x-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground"></div>
-                        <span>Creating Account...</span>
-                      </div>
-                    ) : (
-                      "Create Account"
-                    )}
+                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting ? "Creating Account..." : "Create Account"}
                   </Button>
                 </form>
               </Form>
@@ -331,56 +266,40 @@ const Auth = () => {
 
             {mode === "forgot" && (
               <Form {...forgotPasswordForm}>
-                <form onSubmit={forgotPasswordForm.handleSubmit(onForgotPassword)} className="space-y-5">
+                <form onSubmit={forgotPasswordForm.handleSubmit(onForgotPassword)} className="space-y-4">
                   <FormField
                     control={forgotPasswordForm.control}
                     name="email"
                     render={({ field }) => (
-                      <FormItem className="space-y-2">
-                        <FormLabel className="text-sm font-medium">Email</FormLabel>
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="email" 
-                            placeholder="Enter your email" 
-                            className="h-12 bg-background/60 border-border/20 backdrop-blur-sm focus:bg-background transition-all duration-300"
-                            {...field} 
-                          />
+                          <Input type="email" placeholder="Enter your email" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <Button 
-                    type="submit" 
-                    className="w-full h-12 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]" 
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <div className="flex items-center space-x-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground"></div>
-                        <span>Sending...</span>
-                      </div>
-                    ) : (
-                      "Send Reset Link"
-                    )}
+                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting ? "Sending..." : "Send Reset Link"}
                   </Button>
                 </form>
               </Form>
             )}
 
-            <div className="space-y-4 pt-2">
-              <Separator className="bg-border/20" />
-              <div className="text-center space-y-3">
+            <div className="space-y-4">
+              <Separator />
+              <div className="text-center space-y-2">
                 {mode === "login" && (
                   <>
                     <p className="text-sm text-muted-foreground">
                       Don't have an account?{" "}
-                      <Link to="/auth?mode=signup" className="text-primary hover:underline font-medium transition-colors">
+                      <Link to="/auth?mode=signup" className="text-primary hover:underline">
                         Sign up
                       </Link>
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      <Link to="/auth?mode=forgot" className="text-primary hover:underline font-medium transition-colors">
+                      <Link to="/auth?mode=forgot" className="text-primary hover:underline">
                         Forgot your password?
                       </Link>
                     </p>
@@ -389,7 +308,7 @@ const Auth = () => {
                 {mode === "signup" && (
                   <p className="text-sm text-muted-foreground">
                     Already have an account?{" "}
-                    <Link to="/auth" className="text-primary hover:underline font-medium transition-colors">
+                    <Link to="/auth" className="text-primary hover:underline">
                       Sign in
                     </Link>
                   </p>
@@ -397,7 +316,7 @@ const Auth = () => {
                 {mode === "forgot" && (
                   <p className="text-sm text-muted-foreground">
                     Remember your password?{" "}
-                    <Link to="/auth" className="text-primary hover:underline font-medium transition-colors">
+                    <Link to="/auth" className="text-primary hover:underline">
                       Sign in
                     </Link>
                   </p>
