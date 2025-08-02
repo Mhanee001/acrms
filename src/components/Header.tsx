@@ -76,7 +76,7 @@ const Header = () => {
         <div className="flex items-center space-x-2">
           <Wrench className="h-8 w-8 text-primary" />
           <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary-foreground bg-clip-text text-transparent">
-            Abelov
+            acrms
           </h1>
         </div>
         {/* User Profile */}

@@ -135,7 +135,7 @@ const Auth = () => {
               {mode === "forgot" && "Reset Password"}
             </CardTitle>
             <CardDescription>
-              {mode === "login" && "Sign in to your ACRMS account"}
+              {mode === "login" && "Sign in to your acrms account"}
               {mode === "signup" && "Get started with your hardware maintenance CRM"}
               {mode === "forgot" && "Enter your email to receive a password reset link"}
             </CardDescription>

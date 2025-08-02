@@ -19,7 +19,7 @@ const Landing = () => {
                 <Wrench className="h-8 w-8 text-primary" />
               </div>
               <h1 className="text-3xl font-bold text-gradient">
-                Abelov
+                acrms
               </h1>
             </div>
             <nav className="hidden md:flex items-center space-x-8">
@@ -460,7 +460,7 @@ const Landing = () => {
                 <div className="animate-pulse-glow">
                   <Wrench className="h-8 w-8 text-primary" />
                 </div>
-                <span className="text-2xl font-bold text-gradient">Abelov</span>
+                <span className="text-2xl font-bold text-gradient">acrms</span>
               </div>
               <p className="text-muted-foreground mb-6 leading-relaxed max-w-md">
                 Transforming hardware maintenance operations with innovative technology 
