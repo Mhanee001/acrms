@@ -27,6 +27,18 @@ export const useRoleAccess = () => {
     return role === 'sales';
   };
 
+  const isCEO = (): boolean => {
+    return role === 'ceo';
+  };
+
+  const isManager = (): boolean => {
+    return role === 'manager';
+  };
+
+  const canManageStaff = (): boolean => {
+    return role === 'admin' || role === 'ceo' || role === 'manager';
+  };
+
   const canAccess = (allowedRoles: UserRole[]): boolean => {
     return hasRole(allowedRoles);
   };
@@ -39,6 +51,9 @@ export const useRoleAccess = () => {
     isTechnician,
     isUser,
     isSales,
+    isCEO,
+    isManager,
+    canManageStaff,
     canAccess
   };
 };

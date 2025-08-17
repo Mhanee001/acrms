@@ -58,51 +58,78 @@ export type Database = {
       assets: {
         Row: {
           asset_type: string
+          cpu: string | null
           created_at: string
+          graphics_card: string | null
           id: string
           image_url: string | null
           location: string | null
           manufacturer: string | null
           model: string | null
           name: string
+          network_ports: string | null
+          operating_system: string | null
+          other_specs: string | null
+          power_supply: string | null
           purchase_date: string | null
+          ram: string | null
+          screen_size: string | null
           serial_number: string | null
           specifications: Json | null
           status: string
+          storage: string | null
           updated_at: string
           user_id: string
           warranty_expires: string | null
         }
         Insert: {
           asset_type: string
+          cpu?: string | null
           created_at?: string
+          graphics_card?: string | null
           id?: string
           image_url?: string | null
           location?: string | null
           manufacturer?: string | null
           model?: string | null
           name: string
+          network_ports?: string | null
+          operating_system?: string | null
+          other_specs?: string | null
+          power_supply?: string | null
           purchase_date?: string | null
+          ram?: string | null
+          screen_size?: string | null
           serial_number?: string | null
           specifications?: Json | null
           status?: string
+          storage?: string | null
           updated_at?: string
           user_id: string
           warranty_expires?: string | null
         }
         Update: {
           asset_type?: string
+          cpu?: string | null
           created_at?: string
+          graphics_card?: string | null
           id?: string
           image_url?: string | null
           location?: string | null
           manufacturer?: string | null
           model?: string | null
           name?: string
+          network_ports?: string | null
+          operating_system?: string | null
+          other_specs?: string | null
+          power_supply?: string | null
           purchase_date?: string | null
+          ram?: string | null
+          screen_size?: string | null
           serial_number?: string | null
           specifications?: Json | null
           status?: string
+          storage?: string | null
           updated_at?: string
           user_id?: string
           warranty_expires?: string | null
@@ -296,7 +323,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "user" | "admin" | "technician" | "sales"
+      app_role: "user" | "admin" | "technician" | "sales" | "ceo" | "manager"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -424,7 +451,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["user", "admin", "technician", "sales"],
+      app_role: ["user", "admin", "technician", "sales", "ceo", "manager"],
     },
   },
 } as const

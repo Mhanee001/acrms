@@ -47,9 +47,8 @@ const getNavigationItems = (role: string | null) => {
   const crmItems = [
     { title: "Dashboard", url: "/user-dashboard", icon: LayoutDashboard },
     { title: "Contacts", url: "/contacts", icon: Users },
-    { title: "Leads", url: "/leads", icon: Target },
-    { title: "Opportunities", url: "/opportunities", icon: Zap },
     { title: "Sales Pipeline", url: "/sales-pipeline", icon: TrendingUp },
+    { title: "Staff Management", url: "/staff-management", icon: Users },
     { title: "Products", url: "/products", icon: Package },
     { title: "Reports", url: "/reports", icon: BarChart3 },
     { title: "Email Campaigns", url: "/email-campaigns", icon: Mail },

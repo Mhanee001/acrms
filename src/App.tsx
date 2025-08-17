@@ -18,9 +18,8 @@ import ActivityPage from "./pages/ActivityPage";
 import JobRequests from "./pages/JobRequests";
 import UserManagement from "./pages/UserManagement";
 import Contacts from "./pages/Contacts";
-import Leads from "./pages/Leads";
-import Opportunities from "./pages/Opportunities";
 import SalesPipeline from "./pages/SalesPipeline";
+import StaffManagement from "./pages/StaffManagement";
 import Products from "./pages/Products";
 import Reports from "./pages/Reports";
 import EmailCampaigns from "./pages/EmailCampaigns";
@@ -58,14 +57,9 @@ const App = () => (
                 <Contacts />
               </ProtectedRoute>
             } />
-            <Route path="/leads" element={
-              <ProtectedRoute allowedRoles={['admin', 'sales']}>
-                <Leads />
-              </ProtectedRoute>
-            } />
-            <Route path="/opportunities" element={
-              <ProtectedRoute allowedRoles={['admin', 'sales']}>
-                <Opportunities />
+            <Route path="/staff-management" element={
+              <ProtectedRoute allowedRoles={['admin', 'ceo', 'manager']}>
+                <StaffManagement />
               </ProtectedRoute>
             } />
             <Route path="/sales-pipeline" element={

@@ -63,7 +63,15 @@ export const AssetManager = () => {
     manufacturer: "",
     purchase_date: "",
     warranty_expires: "",
-    specifications: "",
+    cpu: "",
+    ram: "",
+    storage: "",
+    operating_system: "",
+    screen_size: "",
+    graphics_card: "",
+    network_ports: "",
+    power_supply: "",
+    other_specs: "",
     location: "",
     status: "active"
   });
@@ -106,7 +114,15 @@ export const AssetManager = () => {
       manufacturer: "",
       purchase_date: "",
       warranty_expires: "",
-      specifications: "",
+      cpu: "",
+      ram: "",
+      storage: "",
+      operating_system: "",
+      screen_size: "",
+      graphics_card: "",
+      network_ports: "",
+      power_supply: "",
+      other_specs: "",
       location: "",
       status: "active"
     });
@@ -119,8 +135,7 @@ export const AssetManager = () => {
     try {
       const assetData = {
         ...assetForm,
-        user_id: user.id,
-        specifications: assetForm.specifications ? JSON.parse(assetForm.specifications) : null
+        user_id: user.id
       };
 
       let error;
@@ -181,7 +196,15 @@ export const AssetManager = () => {
       manufacturer: asset.manufacturer || "",
       purchase_date: asset.purchase_date || "",
       warranty_expires: asset.warranty_expires || "",
-      specifications: asset.specifications ? JSON.stringify(asset.specifications, null, 2) : "",
+      cpu: (asset as any).cpu || "",
+      ram: (asset as any).ram || "",
+      storage: (asset as any).storage || "",
+      operating_system: (asset as any).operating_system || "",
+      screen_size: (asset as any).screen_size || "",
+      graphics_card: (asset as any).graphics_card || "",
+      network_ports: (asset as any).network_ports || "",
+      power_supply: (asset as any).power_supply || "",
+      other_specs: (asset as any).other_specs || "",
       location: asset.location || "",
       status: asset.status
     });
@@ -356,15 +379,93 @@ export const AssetManager = () => {
                 </div>
               </div>
 
+              {/* Specifications Fields */}
               <div>
-                <Label htmlFor="specifications">Specifications (JSON)</Label>
-                <Textarea
-                  id="specifications"
-                  rows={4}
-                  value={assetForm.specifications}
-                  onChange={(e) => setAssetForm({...assetForm, specifications: e.target.value})}
-                  placeholder='{"CPU": "Intel i7", "RAM": "16GB", "Storage": "512GB SSD"}'
-                />
+                <Label className="text-lg font-semibold">Specifications</Label>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  <div>
+                    <Label htmlFor="cpu">CPU</Label>
+                    <Input
+                      id="cpu"
+                      value={assetForm.cpu}
+                      onChange={(e) => setAssetForm({...assetForm, cpu: e.target.value})}
+                      placeholder="e.g., Intel i7-11800H"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="ram">RAM</Label>
+                    <Input
+                      id="ram"
+                      value={assetForm.ram}
+                      onChange={(e) => setAssetForm({...assetForm, ram: e.target.value})}
+                      placeholder="e.g., 16GB DDR4"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="storage">Storage</Label>
+                    <Input
+                      id="storage"
+                      value={assetForm.storage}
+                      onChange={(e) => setAssetForm({...assetForm, storage: e.target.value})}
+                      placeholder="e.g., 512GB SSD"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="operating_system">Operating System</Label>
+                    <Input
+                      id="operating_system"
+                      value={assetForm.operating_system}
+                      onChange={(e) => setAssetForm({...assetForm, operating_system: e.target.value})}
+                      placeholder="e.g., Windows 11 Pro"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="screen_size">Screen Size</Label>
+                    <Input
+                      id="screen_size"
+                      value={assetForm.screen_size}
+                      onChange={(e) => setAssetForm({...assetForm, screen_size: e.target.value})}
+                      placeholder="e.g., 15.6 inch"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="graphics_card">Graphics Card</Label>
+                    <Input
+                      id="graphics_card"
+                      value={assetForm.graphics_card}
+                      onChange={(e) => setAssetForm({...assetForm, graphics_card: e.target.value})}
+                      placeholder="e.g., NVIDIA GTX 1650"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="network_ports">Network Ports</Label>
+                    <Input
+                      id="network_ports"
+                      value={assetForm.network_ports}
+                      onChange={(e) => setAssetForm({...assetForm, network_ports: e.target.value})}
+                      placeholder="e.g., 2x USB 3.0, HDMI"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="power_supply">Power Supply</Label>
+                    <Input
+                      id="power_supply"
+                      value={assetForm.power_supply}
+                      onChange={(e) => setAssetForm({...assetForm, power_supply: e.target.value})}
+                      placeholder="e.g., 65W charger"
+                    />
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <Label htmlFor="other_specs">Other Specifications</Label>
+                  <Textarea
+                    id="other_specs"
+                    rows={3}
+                    value={assetForm.other_specs}
+                    onChange={(e) => setAssetForm({...assetForm, other_specs: e.target.value})}
+                    placeholder="Any additional specifications or notes..."
+                  />
+                </div>
               </div>
 
               <div className="flex justify-end space-x-2">
