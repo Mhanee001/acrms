@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
@@ -25,26 +25,43 @@ import {
   Settings, 
   LogOut, 
   Camera,
-  Save
+  Save,
+  Upload
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export const ProfileDropdown = () => {
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const { profile, updateProfile } = useProfile();
   const { toast } = useToast();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [profileData, setProfileData] = useState({
     first_name: profile?.first_name || "",
     last_name: profile?.last_name || "", 
     email: profile?.email || "",
-    phone: "",
-    bio: "",
-    company: "",
-    position: ""
+    phone: profile?.phone || "",
+    bio: profile?.bio || "",
+    company: profile?.company || "",
+    position: profile?.position || ""
   });
+
+  useEffect(() => {
+    if (profile) {
+      setProfileData({
+        first_name: profile.first_name || "",
+        last_name: profile.last_name || "",
+        email: profile.email || "",
+        phone: profile.phone || "",
+        bio: profile.bio || "",
+        company: profile.company || "",
+        position: profile.position || ""
+      });
+    }
+  }, [profile]);
 
   const handleProfileUpdate = async () => {
     const result = await updateProfile(profileData);
@@ -53,13 +70,64 @@ export const ProfileDropdown = () => {
     }
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
+    if (!file || !user) return;
+
+    // Validate file type and size
+    if (!file.type.startsWith('image/')) {
       toast({
-        title: "Image Upload",
-        description: "Profile image upload functionality will be implemented with storage",
+        title: "Invalid file type",
+        description: "Please select an image file",
+        variant: "destructive"
       });
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) { // 2MB limit
+      toast({
+        title: "File too large",
+        description: "Please select an image smaller than 2MB",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setUploading(true);
+    
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, {
+          upsert: true
+        });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      // Update profile with new avatar URL
+      await updateProfile({ avatar_url: publicUrl });
+
+      toast({
+        title: "Profile photo updated",
+        description: "Your profile photo has been updated successfully"
+      });
+    } catch (error: any) {
+      toast({
+        title: "Upload failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -123,10 +191,19 @@ export const ProfileDropdown = () => {
                   </Avatar>
                   <div className="space-y-2">
                     <Label htmlFor="avatar-upload" className="cursor-pointer">
-                      <Button variant="outline" size="sm" asChild>
+                      <Button variant="outline" size="sm" asChild disabled={uploading}>
                         <span>
-                          <Camera className="h-4 w-4 mr-2" />
-                          Change Photo
+                          {uploading ? (
+                            <>
+                              <Upload className="h-4 w-4 mr-2 animate-spin" />
+                              Uploading...
+                            </>
+                          ) : (
+                            <>
+                              <Camera className="h-4 w-4 mr-2" />
+                              Change Photo
+                            </>
+                          )}
                         </span>
                       </Button>
                     </Label>
@@ -136,6 +213,7 @@ export const ProfileDropdown = () => {
                       accept="image/*"
                       className="hidden"
                       onChange={handleImageUpload}
+                      disabled={uploading}
                     />
                     <p className="text-xs text-muted-foreground">
                       PNG, JPG up to 2MB
