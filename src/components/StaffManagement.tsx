@@ -7,10 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { UserPlus, Search, Edit, Trash2, Shield, Users, Briefcase, HardHat, TrendingUp, Building } from "lucide-react";
+import { UserPlus, Search, Edit, Trash2, Shield, Users, Briefcase, HardHat, TrendingUp, Building, BarChart3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useRoleAccess } from "@/hooks/useRoleAccess";
 
 interface StaffMember {
   id: string;
@@ -21,10 +22,30 @@ interface StaffMember {
   created_at: string;
 }
 
+interface RoleStats {
+  total: number;
+  admin: number;
+  ceo: number;
+  manager: number;
+  technician: number;
+  sales: number;
+  user: number;
+}
+
 export const StaffManagement = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { canManageStaff } = useRoleAccess();
   const [staff, setStaff] = useState<StaffMember[]>([]);
+  const [roleStats, setRoleStats] = useState<RoleStats>({
+    total: 0,
+    admin: 0,
+    ceo: 0,
+    manager: 0,
+    technician: 0,
+    sales: 0,
+    user: 0
+  });
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
@@ -66,7 +87,28 @@ export const StaffManagement = () => {
         return;
       }
 
-      setStaff(data || []);
+      const staffData = data || [];
+      setStaff(staffData);
+      
+      // Calculate role statistics
+      const stats = staffData.reduce((acc, member) => {
+        const role = member.user_roles[0]?.role || 'user';
+        acc.total++;
+        if (role in acc) {
+          (acc as any)[role]++;
+        }
+        return acc;
+      }, {
+        total: 0,
+        admin: 0,
+        ceo: 0,
+        manager: 0,
+        technician: 0,
+        sales: 0,
+        user: 0
+      });
+      
+      setRoleStats(stats);
     } catch (error) {
       console.error('Error fetching staff:', error);
     } finally {
@@ -229,13 +271,109 @@ export const StaffManagement = () => {
     return <div className="text-center">Loading staff...</div>;
   }
 
+  if (!canManageStaff()) {
+    return (
+      <div className="text-center py-12">
+        <div className="text-destructive text-lg font-semibold">Access Denied</div>
+        <div className="text-muted-foreground">You don't have permission to manage staff.</div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Total</p>
+                <p className="text-2xl font-bold">{roleStats.total}</p>
+              </div>
+              <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">CEO</p>
+                <p className="text-2xl font-bold">{roleStats.ceo}</p>
+              </div>
+              <Building className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Admin</p>
+                <p className="text-2xl font-bold">{roleStats.admin}</p>
+              </div>
+              <Shield className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Manager</p>
+                <p className="text-2xl font-bold">{roleStats.manager}</p>
+              </div>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Technician</p>
+                <p className="text-2xl font-bold">{roleStats.technician}</p>
+              </div>
+              <HardHat className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Sales</p>
+                <p className="text-2xl font-bold">{roleStats.sales}</p>
+              </div>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Users</p>
+                <p className="text-2xl font-bold">{roleStats.user}</p>
+              </div>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold">Staff Management</h2>
-          <p className="text-muted-foreground">Manage team members and their roles</p>
+          <p className="text-muted-foreground">Manage team members and their roles ({roleStats.total} total members)</p>
         </div>
         
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
