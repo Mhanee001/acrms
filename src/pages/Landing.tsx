@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wrench, Shield, Clock, Users, ArrowRight, CheckCircle, Star, TrendingUp, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import heroImage from "@/assets/hero-hardware-maintenance.jpg";
 import serviceImage from "@/assets/service-excellence.jpg";
 import datacenterImage from "@/assets/datacenter-modern.jpg";
@@ -29,6 +30,7 @@ const Landing = () => {
               <a href="#contact" className="text-foreground/80 hover:text-primary transition-colors">Contact</a>
             </nav>
             <div className="flex items-center space-x-4">
+              <ThemeToggle />
               <Button variant="ghost" asChild className="hover-glow">
                 <Link to="/auth">Login</Link>
               </Button>
