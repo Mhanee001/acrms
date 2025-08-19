@@ -46,7 +46,11 @@ export const ProfileDropdown = () => {
     phone: profile?.phone || "",
     bio: profile?.bio || "",
     company: profile?.company || "",
-    position: profile?.position || ""
+    position: profile?.position || "",
+    address: (profile as any)?.address || "",
+    department: (profile as any)?.department || "",
+    emergency_contact: (profile as any)?.emergency_contact || "",
+    employee_id: (profile as any)?.employee_id || ""
   });
 
   useEffect(() => {
@@ -58,7 +62,11 @@ export const ProfileDropdown = () => {
         phone: profile.phone || "",
         bio: profile.bio || "",
         company: profile.company || "",
-        position: profile.position || ""
+        position: profile.position || "",
+        address: (profile as any)?.address || "",
+        department: (profile as any)?.department || "",
+        emergency_contact: (profile as any)?.emergency_contact || "",
+        employee_id: (profile as any)?.employee_id || ""
       });
     }
   }, [profile]);
@@ -257,11 +265,13 @@ export const ProfileDropdown = () => {
                   </div>
                   
                   <div>
-                    <Label htmlFor="phone">Phone</Label>
+                    <Label htmlFor="phone">Phone Number</Label>
                     <Input
                       id="phone"
+                      type="tel"
                       value={profileData.phone}
                       onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                      placeholder="+234 XXX XXX XXXX"
                     />
                   </div>
                   
@@ -274,6 +284,49 @@ export const ProfileDropdown = () => {
                       onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
                       placeholder="Tell us about yourself..."
                     />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="address">Address</Label>
+                      <Textarea
+                        id="address"
+                        rows={2}
+                        value={profileData.address || ""}
+                        onChange={(e) => setProfileData({...profileData, address: e.target.value})}
+                        placeholder="Your address"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="department">Department</Label>
+                      <Input
+                        id="department"
+                        value={profileData.department || ""}
+                        onChange={(e) => setProfileData({...profileData, department: e.target.value})}
+                        placeholder="IT, Sales, HR, etc."
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="emergency_contact">Emergency Contact</Label>
+                      <Input
+                        id="emergency_contact"
+                        value={profileData.emergency_contact || ""}
+                        onChange={(e) => setProfileData({...profileData, emergency_contact: e.target.value})}
+                        placeholder="Name and phone number"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="employee_id">Employee ID</Label>
+                      <Input
+                        id="employee_id"
+                        value={profileData.employee_id || ""}
+                        onChange={(e) => setProfileData({...profileData, employee_id: e.target.value})}
+                        placeholder="EMP001"
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -315,11 +368,6 @@ export const ProfileDropdown = () => {
             </div>
           </DialogContent>
         </Dialog>
-        
-        <DropdownMenuItem>
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Settings</span>
-        </DropdownMenuItem>
         
         <DropdownMenuSeparator />
         

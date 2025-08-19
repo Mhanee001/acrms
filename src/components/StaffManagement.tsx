@@ -118,16 +118,16 @@ export const StaffManagement = () => {
 
   const createStaffMember = async () => {
     try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      // Use admin auth to create user without signing them in
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: staffForm.email,
         password: staffForm.password,
-        options: {
-          data: {
-            first_name: staffForm.first_name,
-            last_name: staffForm.last_name,
-            role: staffForm.role
-          }
-        }
+        user_metadata: {
+          first_name: staffForm.first_name,
+          last_name: staffForm.last_name,
+          role: staffForm.role
+        },
+        email_confirm: true // Skip email confirmation for admin-created users
       });
 
       if (authError) {
@@ -140,17 +140,28 @@ export const StaffManagement = () => {
       }
 
       if (authData.user) {
-        // Update the role with specialty if it's a technician
-        if (staffForm.role === 'technician' && staffForm.specialty) {
-          await supabase
-            .from('user_roles')
-            .update({ specialty: staffForm.specialty })
-            .eq('user_id', authData.user.id);
-        }
+        // Create profile entry
+        await supabase
+          .from('profiles')
+          .insert({
+            id: authData.user.id,
+            first_name: staffForm.first_name,
+            last_name: staffForm.last_name,
+            email: staffForm.email
+          });
+
+        // Create role entry with specialty if applicable
+        await supabase
+          .from('user_roles')
+          .insert({
+            user_id: authData.user.id,
+            role: staffForm.role as any,
+            specialty: staffForm.role === 'technician' ? staffForm.specialty : null
+          });
 
         toast({
           title: "Success",
-          description: "Staff member created successfully"
+          description: "Staff member created successfully. They can now log in with their credentials."
         });
 
         setIsCreateDialogOpen(false);
@@ -161,7 +172,7 @@ export const StaffManagement = () => {
       console.error('Error creating staff member:', error);
       toast({
         title: "Error",
-        description: "Failed to create staff member",
+        description: "Failed to create staff member. Make sure you have admin privileges.",
         variant: "destructive"
       });
     }
