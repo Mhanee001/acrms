@@ -596,17 +596,28 @@ export const AssetManager = () => {
         ) : (
           filteredAssets.map((asset) => (
             <Card key={asset.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <CardTitle className="text-lg">{asset.name}</CardTitle>
-                    <CardDescription>{asset.asset_type}</CardDescription>
-                  </div>
-                  <Badge variant={getStatusColor(asset.status) as any}>
-                    {asset.status}
-                  </Badge>
-                </div>
-              </CardHeader>
+               <CardHeader className="pb-3">
+                 <div className="flex items-start justify-between">
+                   <div className="flex items-center space-x-3">
+                     {asset.image_url && (
+                       <div className="flex-shrink-0">
+                         <img 
+                           src={asset.image_url} 
+                           alt={asset.name}
+                           className="w-12 h-12 object-cover rounded-md"
+                         />
+                       </div>
+                     )}
+                     <div className="space-y-1">
+                       <CardTitle className="text-lg">{asset.name}</CardTitle>
+                       <CardDescription>{asset.asset_type}</CardDescription>
+                     </div>
+                   </div>
+                   <Badge variant={getStatusColor(asset.status) as any}>
+                     {asset.status}
+                   </Badge>
+                 </div>
+               </CardHeader>
               <CardContent className="space-y-3">
                 {asset.manufacturer && (
                   <div className="text-sm">
