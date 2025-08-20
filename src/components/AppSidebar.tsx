@@ -51,7 +51,6 @@ const getNavigationItems = (role: string | null) => {
     { title: "Staff Management", url: "/staff-management", icon: Users },
     { title: "Products", url: "/products", icon: Package },
     { title: "Reports", url: "/reports", icon: BarChart3 },
-    { title: "Email Campaigns", url: "/email-campaigns", icon: Mail },
     { title: "Calendar", url: "/calendar", icon: Calendar },
   ];
 
@@ -76,7 +75,6 @@ const getNavigationItems = (role: string | null) => {
     case "admin":
       return [
         ...crmItems,
-        ...serviceItems,
         ...inventoryItems,
         ...adminItems,
       ];
@@ -91,7 +89,7 @@ const getNavigationItems = (role: string | null) => {
       ];
     case "sales":
       return [
-        ...crmItems,
+        ...crmItems.filter(item => item.title !== "Staff Management"),
         { title: "Activity Log", url: "/activity", icon: Activity },
       ];
     case "user":

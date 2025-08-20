@@ -24,6 +24,7 @@ import Products from "./pages/Products";
 import Reports from "./pages/Reports";
 import EmailCampaigns from "./pages/EmailCampaigns";
 import NotFound from "./pages/NotFound";
+import Inventory from "./pages/Inventory";
 import Calendar from "./pages/Calendar";
 
 const queryClient = new QueryClient();
@@ -110,7 +111,7 @@ const App = () => (
           } />
           <Route path="/inventory" element={
             <ProtectedRoute allowedRoles={['admin', 'technician']}>
-              <MyAssets />
+              <Inventory />
             </ProtectedRoute>
           } />
           <Route path="/notifications" element={
