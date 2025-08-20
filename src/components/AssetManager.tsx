@@ -75,6 +75,8 @@ export const AssetManager = () => {
     location: "",
     status: "active"
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -105,6 +107,33 @@ export const AssetManager = () => {
     }
   };
 
+  const uploadImage = async (file: File): Promise<string | null> => {
+    if (!user) return null;
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        console.error('Error uploading image:', uploadError);
+        return null;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      return null;
+    }
+  };
+
   const resetForm = () => {
     setAssetForm({
       name: "",
@@ -127,15 +156,28 @@ export const AssetManager = () => {
       status: "active"
     });
     setEditingAsset(null);
+    setImageFile(null);
   };
 
   const handleSaveAsset = async () => {
     if (!user) return;
+    setUploading(true);
 
     try {
+      let imageUrl = editingAsset?.image_url || null;
+      
+      // Upload image if a new file is selected
+      if (imageFile) {
+        const uploadedImageUrl = await uploadImage(imageFile);
+        if (uploadedImageUrl) {
+          imageUrl = uploadedImageUrl;
+        }
+      }
+
       const assetData = {
         ...assetForm,
-        user_id: user.id
+        user_id: user.id,
+        image_url: imageUrl
       };
 
       let error;
@@ -180,9 +222,11 @@ export const AssetManager = () => {
       console.error('Error saving asset:', error);
       toast({
         title: "Error",
-        description: "Invalid specifications format",
+        description: "Failed to save asset",
         variant: "destructive"
       });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -468,12 +512,40 @@ export const AssetManager = () => {
                 </div>
               </div>
 
+              {/* Image Upload */}
+              <div>
+                <Label htmlFor="image">Asset Image</Label>
+                <div className="flex items-center space-x-4">
+                  <Input
+                    id="image"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                    className="flex-1"
+                  />
+                  {(imageFile || editingAsset?.image_url) && (
+                    <div className="relative">
+                      <Camera className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                  )}
+                </div>
+                {editingAsset?.image_url && !imageFile && (
+                  <div className="mt-2">
+                    <img 
+                      src={editingAsset.image_url} 
+                      alt="Current asset" 
+                      className="w-20 h-20 object-cover rounded-md"
+                    />
+                  </div>
+                )}
+              </div>
+
               <div className="flex justify-end space-x-2">
                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button onClick={handleSaveAsset}>
-                  {editingAsset ? 'Update Asset' : 'Add Asset'}
+                <Button onClick={handleSaveAsset} disabled={uploading}>
+                  {uploading ? 'Saving...' : editingAsset ? 'Update Asset' : 'Add Asset'}
                 </Button>
               </div>
             </div>

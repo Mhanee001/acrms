@@ -1,5 +1,5 @@
 /**
- * Format currency as Nigerian Naira
+ * Format currency as Nigerian Naira for all user roles
  */
 export const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('en-NG', {
@@ -11,7 +11,7 @@ export const formatCurrency = (amount: number): string => {
 };
 
 /**
- * Format currency with decimals
+ * Format currency with decimals as Nigerian Naira
  */
 export const formatCurrencyWithDecimals = (amount: number): string => {
   return new Intl.NumberFormat('en-NG', {
@@ -20,4 +20,11 @@ export const formatCurrencyWithDecimals = (amount: number): string => {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);
+};
+
+/**
+ * Format price for display in Naira
+ */
+export const formatPrice = (price: number): string => {
+  return formatCurrency(price);
 };
