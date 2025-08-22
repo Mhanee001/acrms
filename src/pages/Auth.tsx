@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import { Separator } from "@/components/ui/separator";
 import { Wrench, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -23,9 +23,6 @@ const signupSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  role: z.enum(["user", "admin", "technician", "sales"], {
-    required_error: "Please select a role",
-  }),
 });
 
 const forgotPasswordSchema = z.object({
@@ -65,7 +62,6 @@ const Auth = () => {
       password: "",
       firstName: "",
       lastName: "",
-      role: undefined,
     },
   });
 
@@ -88,7 +84,7 @@ const Auth = () => {
 
   const onSignup = async (data: SignupForm) => {
     setIsSubmitting(true);
-    const { error } = await signUp(data.email, data.password, data.firstName, data.lastName, data.role);
+    const { error } = await signUp(data.email, data.password, data.firstName, data.lastName);
     if (!error) {
       // Stay on auth page to show success message
     }
@@ -135,7 +131,7 @@ const Auth = () => {
               {mode === "forgot" && "Reset Password"}
             </CardTitle>
             <CardDescription>
-              {mode === "login" && "Sign in to your ACRMS account"}
+              {mode === "login" && "Sign in to your acrms account"}
               {mode === "signup" && "Get started with your hardware maintenance CRM"}
               {mode === "forgot" && "Enter your email to receive a password reset link"}
             </CardDescription>
@@ -230,29 +226,6 @@ const Auth = () => {
                         <FormControl>
                           <Input type="password" placeholder="Create a password" {...field} />
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={signupForm.control}
-                    name="role"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Role</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select your role" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="user">User</SelectItem>
-                            <SelectItem value="technician">Technician</SelectItem>
-                            <SelectItem value="sales">Sales</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
-                          </SelectContent>
-                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}

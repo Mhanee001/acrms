@@ -63,10 +63,20 @@ export const AssetManager = () => {
     manufacturer: "",
     purchase_date: "",
     warranty_expires: "",
-    specifications: "",
+    cpu: "",
+    ram: "",
+    storage: "",
+    operating_system: "",
+    screen_size: "",
+    graphics_card: "",
+    network_ports: "",
+    power_supply: "",
+    other_specs: "",
     location: "",
     status: "active"
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -97,6 +107,33 @@ export const AssetManager = () => {
     }
   };
 
+  const uploadImage = async (file: File): Promise<string | null> => {
+    if (!user) return null;
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        console.error('Error uploading image:', uploadError);
+        return null;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      return null;
+    }
+  };
+
   const resetForm = () => {
     setAssetForm({
       name: "",
@@ -106,21 +143,41 @@ export const AssetManager = () => {
       manufacturer: "",
       purchase_date: "",
       warranty_expires: "",
-      specifications: "",
+      cpu: "",
+      ram: "",
+      storage: "",
+      operating_system: "",
+      screen_size: "",
+      graphics_card: "",
+      network_ports: "",
+      power_supply: "",
+      other_specs: "",
       location: "",
       status: "active"
     });
     setEditingAsset(null);
+    setImageFile(null);
   };
 
   const handleSaveAsset = async () => {
     if (!user) return;
+    setUploading(true);
 
     try {
+      let imageUrl = editingAsset?.image_url || null;
+      
+      // Upload image if a new file is selected
+      if (imageFile) {
+        const uploadedImageUrl = await uploadImage(imageFile);
+        if (uploadedImageUrl) {
+          imageUrl = uploadedImageUrl;
+        }
+      }
+
       const assetData = {
         ...assetForm,
         user_id: user.id,
-        specifications: assetForm.specifications ? JSON.parse(assetForm.specifications) : null
+        image_url: imageUrl
       };
 
       let error;
@@ -165,9 +222,11 @@ export const AssetManager = () => {
       console.error('Error saving asset:', error);
       toast({
         title: "Error",
-        description: "Invalid specifications format",
+        description: "Failed to save asset",
         variant: "destructive"
       });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -181,7 +240,15 @@ export const AssetManager = () => {
       manufacturer: asset.manufacturer || "",
       purchase_date: asset.purchase_date || "",
       warranty_expires: asset.warranty_expires || "",
-      specifications: asset.specifications ? JSON.stringify(asset.specifications, null, 2) : "",
+      cpu: (asset as any).cpu || "",
+      ram: (asset as any).ram || "",
+      storage: (asset as any).storage || "",
+      operating_system: (asset as any).operating_system || "",
+      screen_size: (asset as any).screen_size || "",
+      graphics_card: (asset as any).graphics_card || "",
+      network_ports: (asset as any).network_ports || "",
+      power_supply: (asset as any).power_supply || "",
+      other_specs: (asset as any).other_specs || "",
       location: asset.location || "",
       status: asset.status
     });
@@ -356,23 +423,129 @@ export const AssetManager = () => {
                 </div>
               </div>
 
+              {/* Specifications Fields */}
               <div>
-                <Label htmlFor="specifications">Specifications (JSON)</Label>
-                <Textarea
-                  id="specifications"
-                  rows={4}
-                  value={assetForm.specifications}
-                  onChange={(e) => setAssetForm({...assetForm, specifications: e.target.value})}
-                  placeholder='{"CPU": "Intel i7", "RAM": "16GB", "Storage": "512GB SSD"}'
-                />
+                <Label className="text-lg font-semibold">Specifications</Label>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  <div>
+                    <Label htmlFor="cpu">CPU</Label>
+                    <Input
+                      id="cpu"
+                      value={assetForm.cpu}
+                      onChange={(e) => setAssetForm({...assetForm, cpu: e.target.value})}
+                      placeholder="e.g., Intel i7-11800H"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="ram">RAM</Label>
+                    <Input
+                      id="ram"
+                      value={assetForm.ram}
+                      onChange={(e) => setAssetForm({...assetForm, ram: e.target.value})}
+                      placeholder="e.g., 16GB DDR4"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="storage">Storage</Label>
+                    <Input
+                      id="storage"
+                      value={assetForm.storage}
+                      onChange={(e) => setAssetForm({...assetForm, storage: e.target.value})}
+                      placeholder="e.g., 512GB SSD"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="operating_system">Operating System</Label>
+                    <Input
+                      id="operating_system"
+                      value={assetForm.operating_system}
+                      onChange={(e) => setAssetForm({...assetForm, operating_system: e.target.value})}
+                      placeholder="e.g., Windows 11 Pro"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="screen_size">Screen Size</Label>
+                    <Input
+                      id="screen_size"
+                      value={assetForm.screen_size}
+                      onChange={(e) => setAssetForm({...assetForm, screen_size: e.target.value})}
+                      placeholder="e.g., 15.6 inch"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="graphics_card">Graphics Card</Label>
+                    <Input
+                      id="graphics_card"
+                      value={assetForm.graphics_card}
+                      onChange={(e) => setAssetForm({...assetForm, graphics_card: e.target.value})}
+                      placeholder="e.g., NVIDIA GTX 1650"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="network_ports">Network Ports</Label>
+                    <Input
+                      id="network_ports"
+                      value={assetForm.network_ports}
+                      onChange={(e) => setAssetForm({...assetForm, network_ports: e.target.value})}
+                      placeholder="e.g., 2x USB 3.0, HDMI"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="power_supply">Power Supply</Label>
+                    <Input
+                      id="power_supply"
+                      value={assetForm.power_supply}
+                      onChange={(e) => setAssetForm({...assetForm, power_supply: e.target.value})}
+                      placeholder="e.g., 65W charger"
+                    />
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <Label htmlFor="other_specs">Other Specifications</Label>
+                  <Textarea
+                    id="other_specs"
+                    rows={3}
+                    value={assetForm.other_specs}
+                    onChange={(e) => setAssetForm({...assetForm, other_specs: e.target.value})}
+                    placeholder="Any additional specifications or notes..."
+                  />
+                </div>
+              </div>
+
+              {/* Image Upload */}
+              <div>
+                <Label htmlFor="image">Asset Image</Label>
+                <div className="flex items-center space-x-4">
+                  <Input
+                    id="image"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                    className="flex-1"
+                  />
+                  {(imageFile || editingAsset?.image_url) && (
+                    <div className="relative">
+                      <Camera className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                  )}
+                </div>
+                {editingAsset?.image_url && !imageFile && (
+                  <div className="mt-2">
+                    <img 
+                      src={editingAsset.image_url} 
+                      alt="Current asset" 
+                      className="w-20 h-20 object-cover rounded-md"
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-end space-x-2">
                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                   Cancel
                 </Button>
-                <Button onClick={handleSaveAsset}>
-                  {editingAsset ? 'Update Asset' : 'Add Asset'}
+                <Button onClick={handleSaveAsset} disabled={uploading}>
+                  {uploading ? 'Saving...' : editingAsset ? 'Update Asset' : 'Add Asset'}
                 </Button>
               </div>
             </div>
@@ -423,17 +596,28 @@ export const AssetManager = () => {
         ) : (
           filteredAssets.map((asset) => (
             <Card key={asset.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <CardTitle className="text-lg">{asset.name}</CardTitle>
-                    <CardDescription>{asset.asset_type}</CardDescription>
-                  </div>
-                  <Badge variant={getStatusColor(asset.status) as any}>
-                    {asset.status}
-                  </Badge>
-                </div>
-              </CardHeader>
+               <CardHeader className="pb-3">
+                 <div className="flex items-start justify-between">
+                   <div className="flex items-center space-x-3">
+                     {asset.image_url && (
+                       <div className="flex-shrink-0">
+                         <img 
+                           src={asset.image_url} 
+                           alt={asset.name}
+                           className="w-12 h-12 object-cover rounded-md"
+                         />
+                       </div>
+                     )}
+                     <div className="space-y-1">
+                       <CardTitle className="text-lg">{asset.name}</CardTitle>
+                       <CardDescription>{asset.asset_type}</CardDescription>
+                     </div>
+                   </div>
+                   <Badge variant={getStatusColor(asset.status) as any}>
+                     {asset.status}
+                   </Badge>
+                 </div>
+               </CardHeader>
               <CardContent className="space-y-3">
                 {asset.manufacturer && (
                   <div className="text-sm">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
@@ -25,26 +25,51 @@ import {
   Settings, 
   LogOut, 
   Camera,
-  Save
+  Save,
+  Upload
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export const ProfileDropdown = () => {
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const { profile, updateProfile } = useProfile();
   const { toast } = useToast();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [profileData, setProfileData] = useState({
     first_name: profile?.first_name || "",
     last_name: profile?.last_name || "", 
     email: profile?.email || "",
-    phone: "",
-    bio: "",
-    company: "",
-    position: ""
+    phone: profile?.phone || "",
+    bio: profile?.bio || "",
+    company: profile?.company || "",
+    position: profile?.position || "",
+    address: (profile as any)?.address || "",
+    department: (profile as any)?.department || "",
+    emergency_contact: (profile as any)?.emergency_contact || "",
+    employee_id: (profile as any)?.employee_id || ""
   });
+
+  useEffect(() => {
+    if (profile) {
+      setProfileData({
+        first_name: profile.first_name || "",
+        last_name: profile.last_name || "",
+        email: profile.email || "",
+        phone: profile.phone || "",
+        bio: profile.bio || "",
+        company: profile.company || "",
+        position: profile.position || "",
+        address: (profile as any)?.address || "",
+        department: (profile as any)?.department || "",
+        emergency_contact: (profile as any)?.emergency_contact || "",
+        employee_id: (profile as any)?.employee_id || ""
+      });
+    }
+  }, [profile]);
 
   const handleProfileUpdate = async () => {
     const result = await updateProfile(profileData);
@@ -53,13 +78,64 @@ export const ProfileDropdown = () => {
     }
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
+    if (!file || !user) return;
+
+    // Validate file type and size
+    if (!file.type.startsWith('image/')) {
       toast({
-        title: "Image Upload",
-        description: "Profile image upload functionality will be implemented with storage",
+        title: "Invalid file type",
+        description: "Please select an image file",
+        variant: "destructive"
       });
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) { // 2MB limit
+      toast({
+        title: "File too large",
+        description: "Please select an image smaller than 2MB",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setUploading(true);
+    
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, {
+          upsert: true
+        });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      // Update profile with new avatar URL
+      await updateProfile({ avatar_url: publicUrl });
+
+      toast({
+        title: "Profile photo updated",
+        description: "Your profile photo has been updated successfully"
+      });
+    } catch (error: any) {
+      toast({
+        title: "Upload failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -123,10 +199,19 @@ export const ProfileDropdown = () => {
                   </Avatar>
                   <div className="space-y-2">
                     <Label htmlFor="avatar-upload" className="cursor-pointer">
-                      <Button variant="outline" size="sm" asChild>
+                      <Button variant="outline" size="sm" asChild disabled={uploading}>
                         <span>
-                          <Camera className="h-4 w-4 mr-2" />
-                          Change Photo
+                          {uploading ? (
+                            <>
+                              <Upload className="h-4 w-4 mr-2 animate-spin" />
+                              Uploading...
+                            </>
+                          ) : (
+                            <>
+                              <Camera className="h-4 w-4 mr-2" />
+                              Change Photo
+                            </>
+                          )}
                         </span>
                       </Button>
                     </Label>
@@ -136,6 +221,7 @@ export const ProfileDropdown = () => {
                       accept="image/*"
                       className="hidden"
                       onChange={handleImageUpload}
+                      disabled={uploading}
                     />
                     <p className="text-xs text-muted-foreground">
                       PNG, JPG up to 2MB
@@ -179,11 +265,13 @@ export const ProfileDropdown = () => {
                   </div>
                   
                   <div>
-                    <Label htmlFor="phone">Phone</Label>
+                    <Label htmlFor="phone">Phone Number</Label>
                     <Input
                       id="phone"
+                      type="tel"
                       value={profileData.phone}
                       onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                      placeholder="+234 XXX XXX XXXX"
                     />
                   </div>
                   
@@ -196,6 +284,49 @@ export const ProfileDropdown = () => {
                       onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
                       placeholder="Tell us about yourself..."
                     />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="address">Address</Label>
+                      <Textarea
+                        id="address"
+                        rows={2}
+                        value={profileData.address || ""}
+                        onChange={(e) => setProfileData({...profileData, address: e.target.value})}
+                        placeholder="Your address"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="department">Department</Label>
+                      <Input
+                        id="department"
+                        value={profileData.department || ""}
+                        onChange={(e) => setProfileData({...profileData, department: e.target.value})}
+                        placeholder="IT, Sales, HR, etc."
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="emergency_contact">Emergency Contact</Label>
+                      <Input
+                        id="emergency_contact"
+                        value={profileData.emergency_contact || ""}
+                        onChange={(e) => setProfileData({...profileData, emergency_contact: e.target.value})}
+                        placeholder="Name and phone number"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="employee_id">Employee ID</Label>
+                      <Input
+                        id="employee_id"
+                        value={profileData.employee_id || ""}
+                        onChange={(e) => setProfileData({...profileData, employee_id: e.target.value})}
+                        placeholder="EMP001"
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -237,11 +368,6 @@ export const ProfileDropdown = () => {
             </div>
           </DialogContent>
         </Dialog>
-        
-        <DropdownMenuItem>
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Settings</span>
-        </DropdownMenuItem>
         
         <DropdownMenuSeparator />
         

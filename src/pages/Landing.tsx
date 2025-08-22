@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wrench, Shield, Clock, Users, ArrowRight, CheckCircle, Star, TrendingUp, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import heroImage from "@/assets/hero-hardware-maintenance.jpg";
 import serviceImage from "@/assets/service-excellence.jpg";
 import datacenterImage from "@/assets/datacenter-modern.jpg";
@@ -13,15 +14,13 @@ const Landing = () => {
       {/* Header */}
       <header className="fixed top-0 w-full z-50 glass-morphism border-b border-border/20">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-            {/* <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg"> */}
-                    {/* <Wrench className="h-5 w-5 text-white" /> */}
-                    <img src="/acrms.webp" alt="" className="rounded-xl" width={50} height={50} />
-                  {/* </div> */}
-                               
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary-foreground bg-clip-text text-transparent">
-                ACRMS
+          <div className="flex items-center justify-between animate-fade-in-down">
+            <div className="flex items-center space-x-3">
+              <div className="animate-pulse-glow">
+                <Wrench className="h-8 w-8 text-primary" />
+              </div>
+              <h1 className="text-3xl font-bold text-gradient">
+                acrms
               </h1>
             </div>
             <nav className="hidden md:flex items-center space-x-8">
@@ -31,6 +30,7 @@ const Landing = () => {
               <a href="#contact" className="text-foreground/80 hover:text-primary transition-colors">Contact</a>
             </nav>
             <div className="flex items-center space-x-4">
+              <ThemeToggle />
               <Button variant="ghost" asChild className="hover-glow">
                 <Link to="/auth">Login</Link>
               </Button>
@@ -272,7 +272,7 @@ const Landing = () => {
               />
             </div>
           </div>
-        </div> 
+        </div>
       </section>
 
       {/* Testimonials Section */}
@@ -462,7 +462,7 @@ const Landing = () => {
                 <div className="animate-pulse-glow">
                   <Wrench className="h-8 w-8 text-primary" />
                 </div>
-                <span className="text-2xl font-bold text-gradient">Abelov</span>
+                <span className="text-2xl font-bold text-gradient">acrms</span>
               </div>
               <p className="text-muted-foreground mb-6 leading-relaxed max-w-md">
                 Transforming hardware maintenance operations with innovative technology 

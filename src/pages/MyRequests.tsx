@@ -1,5 +1,5 @@
 import { Layout } from "@/components/Layout";
-import { ServiceRequestsList } from "@/components/ServiceRequestsList";
+import { MyRequestsList } from "@/components/MyRequestsList";
 
 const MyRequests = () => {
   return (
@@ -11,7 +11,7 @@ const MyRequests = () => {
             Track and manage your service requests
           </p>
         </div>
-        <ServiceRequestsList />
+        <MyRequestsList />
       </div>
     </Layout>
   );

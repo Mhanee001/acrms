@@ -15,6 +15,7 @@ import {
   TrendingUp
 } from "lucide-react";
 import { useState } from "react";
+import { formatCurrency } from "@/lib/currency";
 
 const Products = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -123,7 +124,7 @@ const Products = () => {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${totalRevenue.toLocaleString()}</div>
+              <div className="text-2xl font-bold">{formatCurrency(totalRevenue)}</div>
               <p className="text-xs text-muted-foreground">
                 This month
               </p>
@@ -148,7 +149,7 @@ const Products = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                ${Math.round(products.reduce((sum, p) => sum + p.price, 0) / products.length)}
+                {formatCurrency(Math.round(products.reduce((sum, p) => sum + p.price, 0) / products.length))}
               </div>
               <p className="text-xs text-muted-foreground">
                 Average selling price
@@ -203,7 +204,7 @@ const Products = () => {
               <CardContent className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="text-3xl font-bold text-green-600">
-                    ${product.price}
+                    {formatCurrency(product.price)}
                   </div>
                   <div className="text-right">
                     <div className="text-sm text-muted-foreground">Margin</div>
@@ -217,7 +218,7 @@ const Products = () => {
                     <div className="text-sm text-muted-foreground">Units Sold</div>
                   </div>
                   <div className="text-center p-3 bg-muted/30 rounded-lg">
-                    <div className="text-xl font-bold">${product.revenue.toLocaleString()}</div>
+                    <div className="text-xl font-bold">{formatCurrency(product.revenue)}</div>
                     <div className="text-sm text-muted-foreground">Revenue</div>
                   </div>
                 </div>

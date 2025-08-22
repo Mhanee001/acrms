@@ -24,6 +24,11 @@ const Calendar = () => {
     if (!user) return;
 
     try {
+      // Get current month date range
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
       let query = supabase
         .from('service_requests')
         .select(`
@@ -34,8 +39,9 @@ const Calendar = () => {
             email
           )
         `)
-        .not('scheduled_date', 'is', null)
-        .order('scheduled_date', { ascending: true });
+        .gte('created_at', startOfMonth.toISOString())
+        .lte('created_at', endOfMonth.toISOString())
+        .order('created_at', { ascending: false });
 
       // Apply role-based filtering
       if (role === 'user') {
@@ -82,7 +88,8 @@ const Calendar = () => {
   const groupRequestsByDate = (requests: any[]) => {
     const grouped: { [key: string]: any[] } = {};
     requests.forEach(request => {
-      const date = new Date(request.scheduled_date).toDateString();
+      // Use created_at instead of scheduled_date to show all requests
+      const date = new Date(request.created_at).toDateString();
       if (!grouped[date]) {
         grouped[date] = [];
       }
@@ -111,7 +118,7 @@ const Calendar = () => {
         <div className="space-y-2">
           <h1 className="text-4xl font-bold text-gradient">Calendar</h1>
           <p className="text-muted-foreground text-lg">
-            View your scheduled service requests and appointments
+            View all service requests for this month
           </p>
         </div>
 
@@ -121,9 +128,9 @@ const Calendar = () => {
             <CardContent className="pt-6">
               <div className="text-center py-12">
                 <CalendarIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <div className="text-muted-foreground text-lg">No scheduled appointments</div>
+                <div className="text-muted-foreground text-lg">No requests this month</div>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Scheduled service requests will appear here
+                  Service requests for this month will appear here
                 </p>
               </div>
             </CardContent>
@@ -143,7 +150,7 @@ const Calendar = () => {
                     })}</span>
                   </CardTitle>
                   <CardDescription>
-                    {groupedRequests[date].length} scheduled {groupedRequests[date].length === 1 ? 'appointment' : 'appointments'}
+                    {groupedRequests[date].length} {groupedRequests[date].length === 1 ? 'request' : 'requests'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

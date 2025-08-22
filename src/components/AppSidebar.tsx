@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -45,14 +46,12 @@ import { useUserRole } from "@/hooks/useUserRole";
 // CRM Navigation items for different roles
 const getNavigationItems = (role: string | null) => {
   const crmItems = [
-    { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+    { title: "Dashboard", url: "/user-dashboard", icon: LayoutDashboard },
     { title: "Contacts", url: "/contacts", icon: Users },
-    { title: "Leads", url: "/leads", icon: Target },
-    { title: "Opportunities", url: "/opportunities", icon: Zap },
     { title: "Sales Pipeline", url: "/sales-pipeline", icon: TrendingUp },
+    { title: "Staff Management", url: "/staff-management", icon: Users },
     { title: "Products", url: "/products", icon: Package },
     { title: "Reports", url: "/reports", icon: BarChart3 },
-    { title: "Email Campaigns", url: "/email-campaigns", icon: Mail },
     { title: "Calendar", url: "/calendar", icon: Calendar },
   ];
 
@@ -68,7 +67,6 @@ const getNavigationItems = (role: string | null) => {
   ];
 
   const adminItems = [
-    { title: "Admin Dashboard", url: "/admin-dashboard", icon: Shield },
     { title: "User Management", url: "/user-management", icon: Users },
     { title: "Activity Log", url: "/activity", icon: Activity },
     { title: "Notifications", url: "/notifications", icon: Bell },
@@ -78,14 +76,12 @@ const getNavigationItems = (role: string | null) => {
     case "admin":
       return [
         ...crmItems,
-        ...serviceItems,
         ...inventoryItems,
-        { title: "Technician Dashboard", url: "/technician-dashboard", icon: HardHat },
         ...adminItems,
       ];
     case "technician":
       return [
-        { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+        { title: "Dashboard", url: "/user-dashboard", icon: LayoutDashboard },
         { title: "Technician Dashboard", url: "/technician-dashboard", icon: HardHat },
         { title: "Job Requests", url: "/job-requests", icon: Briefcase },
         ...inventoryItems,
@@ -94,13 +90,13 @@ const getNavigationItems = (role: string | null) => {
       ];
     case "sales":
       return [
-        ...crmItems,
+        ...crmItems.filter(item => item.title !== "Staff Management"),
         { title: "Activity Log", url: "/activity", icon: Activity },
       ];
     case "user":
     default:
       return [
-        { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+        { title: "Dashboard", url: "/user-dashboard", icon: LayoutDashboard },
         { title: "My Assets", url: "/my-assets", icon: Package },
         { title: "My Requests", url: "/my-requests", icon: ClipboardList },
         { title: "Service Request", url: "/service-request", icon: Wrench },
@@ -162,8 +158,8 @@ export function AppSidebar() {
           </div>
           {state !== "collapsed" && (
             <div className="animate-fade-in">
-              <h2 className="text-xl font-bold text-gradient">ACRMS</h2>
-              <p className="text-xs text-muted-foreground">Asset & CRM System</p>
+              <h2 className="text-xl font-bold text-gradient">acrms</h2>
+              <p className="text-xs text-muted-foreground">Abelov CRMS</p>
             </div>
           )}
         </div>
@@ -192,7 +188,7 @@ export function AppSidebar() {
                       ${state === "collapsed" ? 'justify-center p-3' : 'px-3 py-2.5'}
                     `}
                   >
-                    <a href={item.url} className="flex items-center w-full">
+                    <Link to={item.url} className="flex items-center w-full">
                       <item.icon 
                         className={`
                           flex-shrink-0 transition-all duration-200
@@ -203,7 +199,7 @@ export function AppSidebar() {
                       {state !== "collapsed" && (
                         <span className="text-sm font-medium truncate">{item.title}</span>
                       )}
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

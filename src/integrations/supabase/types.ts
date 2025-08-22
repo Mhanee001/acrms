@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -58,51 +58,78 @@ export type Database = {
       assets: {
         Row: {
           asset_type: string
+          cpu: string | null
           created_at: string
+          graphics_card: string | null
           id: string
           image_url: string | null
           location: string | null
           manufacturer: string | null
           model: string | null
           name: string
+          network_ports: string | null
+          operating_system: string | null
+          other_specs: string | null
+          power_supply: string | null
           purchase_date: string | null
+          ram: string | null
+          screen_size: string | null
           serial_number: string | null
           specifications: Json | null
           status: string
+          storage: string | null
           updated_at: string
           user_id: string
           warranty_expires: string | null
         }
         Insert: {
           asset_type: string
+          cpu?: string | null
           created_at?: string
+          graphics_card?: string | null
           id?: string
           image_url?: string | null
           location?: string | null
           manufacturer?: string | null
           model?: string | null
           name: string
+          network_ports?: string | null
+          operating_system?: string | null
+          other_specs?: string | null
+          power_supply?: string | null
           purchase_date?: string | null
+          ram?: string | null
+          screen_size?: string | null
           serial_number?: string | null
           specifications?: Json | null
           status?: string
+          storage?: string | null
           updated_at?: string
           user_id: string
           warranty_expires?: string | null
         }
         Update: {
           asset_type?: string
+          cpu?: string | null
           created_at?: string
+          graphics_card?: string | null
           id?: string
           image_url?: string | null
           location?: string | null
           manufacturer?: string | null
           model?: string | null
           name?: string
+          network_ports?: string | null
+          operating_system?: string | null
+          other_specs?: string | null
+          power_supply?: string | null
           purchase_date?: string | null
+          ram?: string | null
+          screen_size?: string | null
           serial_number?: string | null
           specifications?: Json | null
           status?: string
+          storage?: string | null
           updated_at?: string
           user_id?: string
           warranty_expires?: string | null
@@ -141,27 +168,42 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
+          bio: string | null
+          company: string | null
           created_at: string
           email: string
           first_name: string | null
           id: string
           last_name: string | null
+          phone: string | null
+          position: string | null
           updated_at: string
         }
         Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          company?: string | null
           created_at?: string
           email: string
           first_name?: string | null
           id: string
           last_name?: string | null
+          phone?: string | null
+          position?: string | null
           updated_at?: string
         }
         Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          company?: string | null
           created_at?: string
           email?: string
           first_name?: string | null
           id?: string
           last_name?: string | null
+          phone?: string | null
+          position?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -274,14 +316,14 @@ export type Database = {
     Functions: {
       has_role: {
         Args: {
-          _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
         }
         Returns: boolean
       }
     }
     Enums: {
-      app_role: "user" | "admin" | "technician" | "sales"
+      app_role: "user" | "admin" | "technician" | "sales" | "ceo" | "manager"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -409,7 +451,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["user", "admin", "technician", "sales"],
+      app_role: ["user", "admin", "technician", "sales", "ceo", "manager"],
     },
   },
 } as const

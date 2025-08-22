@@ -13,6 +13,7 @@ import {
   AlertTriangle,
   BarChart3
 } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Layout } from "@/components/Layout";
@@ -43,13 +44,13 @@ const Dashboard = () => {
     if (!roleLoading && role && user) {
       switch (role) {
         case "admin":
-          navigate("/admin-dashboard");
+          // Admins stay on this dashboard
           break;
         case "technician":
           navigate("/technician-dashboard");
           break;
         default:
-          // Stay on general dashboard for users
+          navigate("/user-dashboard");
           break;
       }
     }
@@ -186,7 +187,7 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-purple-700 dark:text-purple-300">Total Spent</p>
-                  <p className="text-3xl font-bold text-purple-900 dark:text-purple-100">${stats.totalSpent}</p>
+                  <p className="text-3xl font-bold text-purple-900 dark:text-purple-100">{formatCurrency(stats.totalSpent)}</p>
                   <p className="text-xs text-purple-600 dark:text-purple-400 flex items-center">
                     <DollarSign className="h-3 w-3 mr-1" />
                     This year
