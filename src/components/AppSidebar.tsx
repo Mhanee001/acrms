@@ -187,7 +187,7 @@ export function AppSidebar() {
                       ${state === "collapsed" ? 'justify-center p-3' : 'px-3 py-2.5'}
                     `}
                   >
-                    <a href={item.url} className="flex items-center w-full">
+                    <Link to={item.url} className="flex items-center w-full">
                       <item.icon 
                         className={`
                           flex-shrink-0 transition-all duration-200
@@ -198,7 +198,7 @@ export function AppSidebar() {
                       {state !== "collapsed" && (
                         <span className="text-sm font-medium truncate">{item.title}</span>
                       )}
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
