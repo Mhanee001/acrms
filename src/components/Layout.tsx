@@ -37,3 +37,5 @@ export function Layout({ children, showSidebar = true }: LayoutProps) {
     </SidebarProvider>
   );
 }
+
+export default Layout;
