@@ -160,8 +160,8 @@ export const StaffManagement = () => {
           });
 
         toast({
-          title: "Success",
-          description: "Staff member created successfully. They can now log in with their credentials."
+          title: "Success", 
+          description: `${staffForm.role === 'user' ? 'User' : 'Staff member'} created successfully. They can now log in with their credentials.`
         });
 
         setIsCreateDialogOpen(false);
@@ -389,14 +389,14 @@ export const StaffManagement = () => {
         
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button onClick={resetForm}>
-              <UserPlus className="h-4 w-4 mr-2" />
-              Add Staff Member
-            </Button>
+          <Button onClick={resetForm}>
+            <UserPlus className="h-4 w-4 mr-2" />
+            Add User/Staff
+          </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Create New Staff Member</DialogTitle>
+              <DialogTitle>Create New User/Staff Member</DialogTitle>
             </DialogHeader>
             
             <div className="space-y-4">
@@ -478,7 +478,7 @@ export const StaffManagement = () => {
                   Cancel
                 </Button>
                 <Button onClick={createStaffMember}>
-                  Create Staff Member
+                  Create {staffForm.role === 'user' ? 'User' : 'Staff Member'}
                 </Button>
               </div>
             </div>
