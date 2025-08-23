@@ -50,7 +50,7 @@ const ServiceRequest = () => {
       <div className="p-6 space-y-8 animate-fade-in-up">
         <h1 className="text-4xl font-bold text-gradient">Service Requests</h1>
         <CreateRequest onRequestCreated={handleCreated} />
-        <MyRequestsList refresh={refresh} />
+        {/* <MyRequestsList refresh={refresh} /> */}
       </div>
     </Layout>
   );
