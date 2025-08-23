@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,7 @@ interface ServiceRequest {
   title: string;
   description: string | null;
   status: string;
+   refresh?: boolean;
   priority: string;
   job_type: string;
   location: string | null;
@@ -57,18 +58,13 @@ export const MyRequestsList = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
-        .from('service_requests')
-        .select(`
-          *,
-          profiles!service_requests_user_id_fkey (
-            first_name,
-            last_name,
-            email
-          )
-        `)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+const { data, error } = await supabase
+  .from('service_requests')
+  .select(`
+    *,profiles!fk_service_requests_assigned_technician_id(first_name,last_name,email)
+  `)
+  .eq('user_id', user.id)
+  .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching my requests:', error);

@@ -132,7 +132,7 @@ const Auth = () => {
             </CardTitle>
             <CardDescription>
               {mode === "login" && "Sign in to your acrms account"}
-              {mode === "signup" && "Get started with your hardware maintenance CRM"}
+              {mode === "signup" && "Get started with ACRM"}
               {mode === "forgot" && "Enter your email to receive a password reset link"}
             </CardDescription>
           </CardHeader>
@@ -184,7 +184,7 @@ const Auth = () => {
                         <FormItem>
                           <FormLabel>First Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="John" {...field} />
+                            <Input placeholder="firstname" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
