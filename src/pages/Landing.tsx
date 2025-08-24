@@ -1,27 +1,13 @@
-<template>
-  <div class="text-base sm:text-lg md:text-xl">
-    <h1 class="text-2xl sm:text-3xl md:text-4xl">Welcome to Our Landing Page</h1>
-    <p class="text-base sm:text-lg md:text-xl">This is a responsive landing page built with Tailwind CSS.</p>
-    <nav class="flex space-x-4">
-      <a href="#" class="text-sm sm:text-base md:text-lg">Home</a>
-      <a href="#" class="text-sm sm:text-base md:text-lg">About</a>
-      <a href="#" class="text-sm sm:text-base md:text-lg">Contact</a>
-    </nav>
-    <button class="px-4 py-2 text-sm sm:text-base md:text-lg bg-blue-500 text-white rounded">Get Started</button>
-  </div>
-</template>
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Wrench, Shield, Clock, Users, ArrowRight, CheckCircle, Star, TrendingUp, Zap } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import heroImage from "@/assets/hero-hardware-maintenance.jpg";
+import serviceImage from "@/assets/service-excellence.jpg";
+import datacenterImage from "@/assets/datacenter-modern.jpg";
+import teamImage from "@/assets/professional-team.jpg";
 
-<<<<<<< Updated upstream
-<script>
-export default {
-  name: 'Landing'
-}
-</script>
-
-<style scoped>
-/* Add any additional styles here */
-</style>
-=======
 const Landing = () => {
   return (
     <div className="min-h-screen hero-bg">
@@ -31,8 +17,7 @@ const Landing = () => {
           <div className="flex items-center justify-between animate-fade-in-down">
             <div className="flex items-center space-x-3">
               <div className="animate-pulse-glow">
-                {/* <Wrench className="h-8 w-8 text-primary" /> */}
-                <img src="\acrms.webp" width={50} alt="logo"  />
+                <Wrench className="h-8 w-8 text-primary" />
               </div>
               <h1 className="text-3xl font-bold text-gradient">
                 acrms
@@ -64,7 +49,7 @@ const Landing = () => {
           <img 
             src={heroImage} 
             alt="Professional hardware maintenance" 
-            className="w-full h-full object-cover opacity-100"
+            className="w-full h-full object-cover opacity-20"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/70 to-background/90"></div>
         </div>
@@ -89,7 +74,7 @@ const Landing = () => {
             
             <div className="animate-fade-in-up" style={{animationDelay: '0.2s'}}>
               <p className="text-xl md:text-2xl text-muted-foreground mb-12 leading-relaxed max-w-3xl mx-auto">
-                Transform your hardware maintenance operations with our cutting-edge CRMS platform. 
+                Transform your hardware maintenance operations with our cutting-edge CRM platform. 
                 Streamline workflows, enhance customer relationships, and boost technician productivity.
               </p>
             </div>
@@ -97,12 +82,12 @@ const Landing = () => {
             <div className="animate-fade-in-up flex flex-col sm:flex-row items-center justify-center gap-6" style={{animationDelay: '0.4s'}}>
               <Button size="lg" asChild className="group hover-float text-lg px-8 py-4">
                 <Link to="/auth?mode=signup">
-                  Get Started
+                  Start Free Trial
                   <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
               <Button variant="outline" size="lg" asChild className="hover-glow text-lg px-8 py-4">
-                <Link to="/auth">Login</Link>
+                <Link to="/auth">Login to Dashboard</Link>
               </Button>
             </div>
             
@@ -432,12 +417,12 @@ const Landing = () => {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16">
               <Button size="lg" asChild className="group hover-float text-lg px-8 py-4">
                 <Link to="/auth?mode=signup">
-                  Get Started
+                  Start Free Trial - No Credit Card Required
                   <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
               <Button variant="outline" size="lg" asChild className="hover-glow text-lg px-8 py-4">
-                <Link to="/auth">Login</Link>
+                <Link to="/auth">Login to Existing Account</Link>
               </Button>
             </div>
             
@@ -485,7 +470,7 @@ const Landing = () => {
               </p>
               <div className="flex space-x-4">
                 <Button variant="outline" size="sm" className="hover-glow">
-                  <Link to="/auth?mode=signup">Join Now</Link>
+                  <Link to="/auth?mode=signup">Try Free Trial</Link>
                 </Button>
               </div>
             </div>
@@ -521,4 +506,3 @@ const Landing = () => {
 };
 
 export default Landing;
->>>>>>> Stashed changes
