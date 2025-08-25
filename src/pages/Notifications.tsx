@@ -5,7 +5,7 @@ const Notifications = () => {
   return (
     <Layout showSidebar={true}>
       <div className="p-6">
-        <NotificationCenter />
+         <NotificationCenter /> 
       </div>
     </Layout>
   );

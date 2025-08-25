@@ -165,7 +165,7 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-2 py-4">
+      <SidebarContent className={`py-4 ${state === "collapsed" ? "px-2" : "px-3"}`}>
         <SidebarGroup>
           {state !== "collapsed" && (
             <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider mb-2">
@@ -185,7 +185,7 @@ export function AppSidebar() {
                         ? 'bg-primary/10 text-primary border border-primary/20 shadow-sm' 
                         : 'hover:bg-muted/60 hover:text-foreground border border-transparent'
                       }
-                      ${state === "collapsed" ? 'justify-center p-3' : 'px-3 py-2.5'}
+                      ${state === "collapsed" ? 'justify-center p-2 mx-1' : 'px-3 py-2.5'}
                     `}
                   >
                     <Link to={item.url} className="flex items-center w-full">

@@ -26,7 +26,7 @@ export const AddContactDialog = ({ open, onOpenChange, onContactAdded }: AddCont
     company: "",
     position: "",
     bio: "",
-    role: "user"
+    role: "user" as "user" | "admin" | "technician" | "sales" | "ceo" | "manager"
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -107,7 +107,7 @@ export const AddContactDialog = ({ open, onOpenChange, onContactAdded }: AddCont
           .from('user_roles')
           .insert({
             user_id: authData.user.id,
-            role: formData.role
+            role: formData.role as "user" | "admin" | "technician" | "sales" | "ceo" | "manager"
           });
 
         if (roleError) {
@@ -134,7 +134,7 @@ export const AddContactDialog = ({ open, onOpenChange, onContactAdded }: AddCont
         company: "",
         position: "",
         bio: "",
-        role: "user"
+        role: "user" as "user" | "admin" | "technician" | "sales" | "ceo" | "manager"
       });
 
       onContactAdded();

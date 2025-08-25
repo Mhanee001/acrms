@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/useAuth";
 import { ProfileDropdown } from "./ProfileDropdown";
-import { NotificationCenter } from "./NotificationCenter";
+import { NotificationBell } from "./NotificationBell";
 
 interface LayoutProps {
   children: ReactNode;
@@ -28,7 +28,7 @@ export function Layout({ children, showSidebar = true }: LayoutProps) {
             <SidebarTrigger className="hover:bg-muted/60 rounded-lg p-2 transition-colors" />
             <Separator orientation="vertical" className="mr-2 h-4" />
             <div className="flex-1" />
-            <NotificationCenter />
+            <NotificationBell />
             <ProfileDropdown />
           </header>
           <main className="flex-1 overflow-auto">
