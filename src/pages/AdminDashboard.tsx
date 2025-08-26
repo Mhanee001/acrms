@@ -478,6 +478,9 @@ const AdminDashboard = () => {
                         <SelectItem value="all">All Roles</SelectItem>
                         <SelectItem value="user">Users</SelectItem>
                         <SelectItem value="technician">Technicians</SelectItem>
+                        <SelectItem value="sales">Sales</SelectItem>
+                        <SelectItem value="manager">Managers</SelectItem>
+                        <SelectItem value="ceo">CEOs</SelectItem>
                         <SelectItem value="admin">Admins</SelectItem>
                       </SelectContent>
                     </Select>

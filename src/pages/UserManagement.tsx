@@ -22,7 +22,10 @@ import {
   Trash2, 
   Shield,
   User,
-  Wrench
+  Wrench,
+  TrendingUp,
+  Building,
+  BarChart3
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -100,7 +103,7 @@ const UserManagement = () => {
       // Then insert new role
       const { error } = await supabase
         .from('user_roles')
-        .insert([{ user_id: userId, role: newRole as 'user' | 'admin' | 'technician' }]);
+        .insert([{ user_id: userId, role: newRole as any }]);
 
       if (error) {
         toast({
@@ -153,7 +156,10 @@ const UserManagement = () => {
   const getRoleIcon = (role: string) => {
     switch (role) {
       case 'admin': return <Shield className="h-4 w-4 text-red-500" />;
+      case 'ceo': return <Building className="h-4 w-4 text-purple-500" />;
+      case 'manager': return <BarChart3 className="h-4 w-4 text-blue-500" />;
       case 'technician': return <Wrench className="h-4 w-4 text-blue-500" />;
+      case 'sales': return <TrendingUp className="h-4 w-4 text-green-500" />;
       default: return <User className="h-4 w-4 text-green-500" />;
     }
   };
@@ -161,7 +167,10 @@ const UserManagement = () => {
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'admin': return 'destructive';
-      case 'technician': return 'default';
+      case 'ceo': return 'default';
+      case 'manager': return 'secondary';
+      case 'technician': return 'outline';
+      case 'sales': return 'default';
       default: return 'secondary';
     }
   };
@@ -227,7 +236,10 @@ const UserManagement = () => {
                   <SelectContent>
                     <SelectItem value="all">All Roles</SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="ceo">CEO</SelectItem>
+                    <SelectItem value="manager">Manager</SelectItem>
                     <SelectItem value="technician">Technician</SelectItem>
+                    <SelectItem value="sales">Sales</SelectItem>
                     <SelectItem value="user">User</SelectItem>
                   </SelectContent>
                 </Select>
@@ -324,6 +336,9 @@ const UserManagement = () => {
                     <SelectContent>
                       <SelectItem value="user">User</SelectItem>
                       <SelectItem value="technician">Technician</SelectItem>
+                      <SelectItem value="sales">Sales</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="ceo">CEO</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
                   </Select>
