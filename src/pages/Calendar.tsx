@@ -13,6 +13,7 @@ const Calendar = () => {
   const { role } = useUserRole();
   const [scheduledRequests, setScheduledRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [now, setNow] = useState<Date>(new Date());
 
   useEffect(() => {
     if (user) {
@@ -20,24 +21,25 @@ const Calendar = () => {
     }
   }, [user, role]);
 
+  // live time ticker
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
   const fetchScheduledRequests = async () => {
     if (!user) return;
 
     try {
       // Get current month date range
-      const now = new Date();
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      const nowDate = new Date();
+      const startOfMonth = new Date(nowDate.getFullYear(), nowDate.getMonth(), 1);
+      const endOfMonth = new Date(nowDate.getFullYear(), nowDate.getMonth() + 1, 0);
 
       let query = supabase
         .from('service_requests')
         .select(`
-          *,
-          profiles!service_requests_user_id_fkey (
-            first_name,
-            last_name,
-            email
-          )
+          *
         `)
         .gte('created_at', startOfMonth.toISOString())
         .lte('created_at', endOfMonth.toISOString())
@@ -98,6 +100,47 @@ const Calendar = () => {
     return grouped;
   };
 
+  const renderMonthGrid = () => {
+    const d = new Date(now);
+    const year = d.getFullYear();
+    const month = d.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const startWeekday = firstDay.getDay(); // 0-6
+    const daysInMonth = lastDay.getDate();
+
+    const cells: Array<{ date: Date | null }> = [];
+    for (let i = 0; i < startWeekday; i++) cells.push({ date: null });
+    for (let day = 1; day <= daysInMonth; day++) cells.push({ date: new Date(year, month, day) });
+
+    const todayKey = new Date().toDateString();
+    const grouped = groupRequestsByDate(scheduledRequests);
+
+    return (
+      <div className="grid grid-cols-7 gap-2">
+        {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(h => (
+          <div key={h} className="text-xs font-medium text-muted-foreground text-center">{h}</div>
+        ))}
+        {cells.map((cell, idx) => {
+          const label = cell.date ? cell.date.getDate() : '';
+          const key = cell.date ? cell.date.toDateString() : `empty-${idx}`;
+          const isToday = cell.date && key === todayKey;
+          const count = cell.date && grouped[key] ? grouped[key].length : 0;
+          return (
+            <div key={key} className={`border rounded-md p-2 h-20 relative ${isToday ? 'bg-primary/10 border-primary/40' : 'bg-muted/20'}`}>
+              <div className="text-xs absolute top-1 left-1">{label}</div>
+              {count > 0 && (
+                <div className="absolute bottom-1 right-1 text-[10px] px-1 rounded bg-primary/20 text-primary">
+                  {count} req
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <Layout showSidebar={true}>
@@ -120,9 +163,29 @@ const Calendar = () => {
           <p className="text-muted-foreground text-lg">
             View all service requests for this month
           </p>
+          <div className="text-sm text-muted-foreground flex items-center space-x-2">
+            <Clock className="h-4 w-4" />
+            <span>{now.toLocaleString()}</span>
+          </div>
         </div>
 
-        {/* Calendar View */}
+        {/* Month Grid */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center space-x-2">
+              <CalendarIcon className="h-5 w-5" />
+              <span>
+                {now.toLocaleString('en-US', { month: 'long', year: 'numeric' })}
+              </span>
+            </CardTitle>
+            <CardDescription>Requests per day for the current month</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {renderMonthGrid()}
+          </CardContent>
+        </Card>
+
+        {/* List View */}
         {dates.length === 0 ? (
           <Card>
             <CardContent className="pt-6">

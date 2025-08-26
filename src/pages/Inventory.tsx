@@ -22,6 +22,7 @@ import {
 import { formatCurrency } from "@/lib/currency";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface InventoryItem {
   id: string;
@@ -46,80 +47,132 @@ const Inventory = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  
-  // Mock data for now - replace with actual database calls
-  const mockInventoryItems: InventoryItem[] = [
-    {
-      id: "1",
-      name: "Server Rack Unit",
-      description: "42U server rack for data center equipment",
-      category: "Hardware",
-      quantity: 15,
-      min_stock_level: 5,
-      unit_price: 450000,
-      supplier: "TechCorp Nigeria",
-      location: "Warehouse A",
-      status: 'in_stock',
-      last_updated: new Date().toISOString()
-    },
-    {
-      id: "2", 
-      name: "Network Cables (Cat6)",
-      description: "Ethernet cables for network infrastructure",
-      category: "Networking",
-      quantity: 3,
-      min_stock_level: 10,
-      unit_price: 2500,
-      supplier: "Cable Solutions Ltd",
-      location: "Storage Room B",
-      status: 'low_stock',
-      last_updated: new Date().toISOString()
-    },
-    {
-      id: "3",
-      name: "Power Supply Units", 
-      description: "Redundant power supplies for servers",
-      category: "Hardware",
-      quantity: 0,
-      min_stock_level: 8,
-      unit_price: 125000,
-      supplier: "Power Systems Nigeria",
-      location: "Warehouse A",
-      status: 'out_of_stock',
-      last_updated: new Date().toISOString()
-    },
-    {
-      id: "4",
-      name: "Office Chairs",
-      description: "Ergonomic office chairs for workstations",
-      category: "Furniture",
-      quantity: 25,
-      min_stock_level: 10,
-      unit_price: 35000,
-      supplier: "Office Furniture Plus",
-      location: "Office Store",
-      status: 'in_stock',
-      last_updated: new Date().toISOString()
-    },
-    {
-      id: "5",
-      name: "Cleaning Supplies",
-      description: "Various cleaning materials and equipment",
-      category: "Maintenance",
-      quantity: 45,
-      min_stock_level: 20,
-      unit_price: 15000,
-      supplier: "Clean Corp",
-      location: "Maintenance Room",
-      status: 'in_stock',
-      last_updated: new Date().toISOString()
-    }
-  ];
+
+  // Add form state
+  const [newItemName, setNewItemName] = useState("");
+  const [newItemDescription, setNewItemDescription] = useState("");
+  const [newItemCategory, setNewItemCategory] = useState<string | undefined>(undefined);
+  const [newItemQuantity, setNewItemQuantity] = useState<number | undefined>(undefined);
+  const [newItemMinStock, setNewItemMinStock] = useState<number | undefined>(undefined);
+  const [newItemUnitPrice, setNewItemUnitPrice] = useState<number | undefined>(undefined);
+  const [newItemSupplier, setNewItemSupplier] = useState("");
+  const [newItemLocation, setNewItemLocation] = useState("");
 
   useEffect(() => {
-    // Initialize with mock data
-    setItems(mockInventoryItems);
+    fetchInventory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const fetchInventory = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('inventory')
+        .select('*')
+        .order('last_updated', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching inventory:', error);
+      }
+
+      if (data) {
+        // Ensure status exists; compute if missing
+        const normalized: InventoryItem[] = data.map((row: any) => {
+          const quantity = Number(row.quantity ?? 0);
+          const minStock = Number(row.min_stock_level ?? 0);
+          let status: InventoryItem['status'] = 'in_stock';
+          if (quantity <= 0) status = 'out_of_stock';
+          else if (quantity < minStock) status = 'low_stock';
+          return {
+            id: row.id,
+            name: row.name,
+            description: row.description ?? '',
+            category: row.category ?? 'Uncategorized',
+            quantity,
+            min_stock_level: minStock,
+            unit_price: Number(row.unit_price ?? 0),
+            supplier: row.supplier ?? '',
+            location: row.location ?? '',
+            status: (row.status as InventoryItem['status']) ?? status,
+            last_updated: row.last_updated ?? row.updated_at ?? row.created_at ?? new Date().toISOString(),
+          };
+        });
+        setItems(normalized);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddItem = async () => {
+    if (!newItemName || !newItemCategory || newItemQuantity === undefined || newItemUnitPrice === undefined) {
+      toast({ title: 'Missing fields', description: 'Please fill name, category, quantity, and unit price.', variant: 'destructive' });
+      return;
+    }
+
+    // Compute status
+    const quantity = Number(newItemQuantity);
+    const minStock = Number(newItemMinStock ?? 0);
+    let status: InventoryItem['status'] = 'in_stock';
+    if (quantity <= 0) status = 'out_of_stock';
+    else if (quantity < minStock) status = 'low_stock';
+
+    const payload = {
+      name: newItemName,
+      description: newItemDescription,
+      category: newItemCategory,
+      quantity,
+      min_stock_level: minStock,
+      unit_price: Number(newItemUnitPrice),
+      supplier: newItemSupplier,
+      location: newItemLocation,
+      status,
+    };
+
+    const { data, error } = await supabase
+      .from('inventory')
+      .insert(payload)
+      .select('*')
+      .single();
+
+    if (error) {
+      console.error('Error adding inventory item:', error);
+      toast({ title: 'Error', description: 'Failed to add item.', variant: 'destructive' });
+      return;
+    }
+
+    toast({ title: 'Item Added', description: 'New inventory item has been added successfully.' });
+
+    // Optimistically add or refetch
+    if (data) {
+      setItems(prev => [{
+        id: data.id,
+        name: data.name,
+        description: data.description ?? '',
+        category: data.category ?? 'Uncategorized',
+        quantity: Number(data.quantity ?? 0),
+        min_stock_level: Number(data.min_stock_level ?? 0),
+        unit_price: Number(data.unit_price ?? 0),
+        supplier: data.supplier ?? '',
+        location: data.location ?? '',
+        status: (data.status as InventoryItem['status']) ?? status,
+        last_updated: data.last_updated ?? data.updated_at ?? data.created_at ?? new Date().toISOString(),
+      }, ...prev]);
+    } else {
+      fetchInventory();
+    }
+
+    // Reset form and close
+    setNewItemName("");
+    setNewItemDescription("");
+    setNewItemCategory(undefined);
+    setNewItemQuantity(undefined);
+    setNewItemMinStock(undefined);
+    setNewItemUnitPrice(undefined);
+    setNewItemSupplier("");
+    setNewItemLocation("");
+    setIsAddDialogOpen(false);
+  };
 
   const filteredItems = items.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -180,44 +233,50 @@ const Inventory = () => {
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="name" className="text-right">Name</Label>
-                  <Input id="name" className="col-span-3" />
+                  <Input id="name" className="col-span-3" value={newItemName} onChange={e => setNewItemName(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="description" className="text-right">Description</Label>
-                  <Input id="description" className="col-span-3" />
+                  <Input id="description" className="col-span-3" value={newItemDescription} onChange={e => setNewItemDescription(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="category" className="text-right">Category</Label>
-                  <Select>
+                  <Select value={newItemCategory} onValueChange={setNewItemCategory}>
                     <SelectTrigger className="col-span-3">
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="hardware">Hardware</SelectItem>
-                      <SelectItem value="networking">Networking</SelectItem>
-                      <SelectItem value="furniture">Furniture</SelectItem>
-                      <SelectItem value="maintenance">Maintenance</SelectItem>
-                      <SelectItem value="office">Office Supplies</SelectItem>
+                      <SelectItem value="Hardware">Hardware</SelectItem>
+                      <SelectItem value="Networking">Networking</SelectItem>
+                      <SelectItem value="Furniture">Furniture</SelectItem>
+                      <SelectItem value="Maintenance">Maintenance</SelectItem>
+                      <SelectItem value="Office">Office Supplies</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="quantity" className="text-right">Quantity</Label>
-                  <Input id="quantity" type="number" className="col-span-3" />
+                  <Input id="quantity" type="number" className="col-span-3" value={newItemQuantity ?? ''} onChange={e => setNewItemQuantity(e.target.value === '' ? undefined : Number(e.target.value))} />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="min_stock" className="text-right">Min Stock</Label>
+                  <Input id="min_stock" type="number" className="col-span-3" value={newItemMinStock ?? ''} onChange={e => setNewItemMinStock(e.target.value === '' ? undefined : Number(e.target.value))} />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="price" className="text-right">Unit Price</Label>
-                  <Input id="price" type="number" className="col-span-3" />
+                  <Input id="price" type="number" className="col-span-3" value={newItemUnitPrice ?? ''} onChange={e => setNewItemUnitPrice(e.target.value === '' ? undefined : Number(e.target.value))} />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="supplier" className="text-right">Supplier</Label>
+                  <Input id="supplier" className="col-span-3" value={newItemSupplier} onChange={e => setNewItemSupplier(e.target.value)} />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="location" className="text-right">Location</Label>
+                  <Input id="location" className="col-span-3" value={newItemLocation} onChange={e => setNewItemLocation(e.target.value)} />
                 </div>
               </div>
               <DialogFooter>
-                <Button type="submit" onClick={() => {
-                  toast({
-                    title: "Item Added",
-                    description: "New inventory item has been added successfully.",
-                  });
-                  setIsAddDialogOpen(false);
-                }}>Add Item</Button>
+                <Button type="button" onClick={handleAddItem}>Add Item</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -320,7 +379,7 @@ const Inventory = () => {
             <CardContent className="pt-6">
               <div className="text-center py-12">
                 <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <div className="text-muted-foreground text-lg">No inventory items found</div>
+                <div className="text-muted-foreground text-lg">{loading ? 'Loading inventory...' : 'No inventory items found'}</div>
                 <p className="text-sm text-muted-foreground mt-2">
                   Try adjusting your search criteria or add new items.
                 </p>

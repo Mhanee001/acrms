@@ -58,37 +58,50 @@ const TechnicianDashboard = () => {
     }
   }, [user, role]);
 
+  useEffect(() => {
+    if (!user || role !== 'technician') return;
+
+    // Subscribe to notifications for this technician
+    const channel = supabase
+      .channel('technician_notifications')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          const notif: any = payload.new;
+          toast({ title: notif.title || 'New Notification', description: notif.message || 'You have a new update.' });
+          // refresh requests if the notification relates to assignments
+          if ((notif.title || '').toLowerCase().includes('assigned')) {
+            fetchRequests();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, role]);
+
   const fetchRequests = async () => {
     if (!user) return;
 
     try {
-      // Get technician's specialty
-      const { data: userRoleData } = await supabase
-        .from('user_roles')
-        .select('specialty')
-        .eq('user_id', user.id)
-        .single();
-
-      const technicianSpecialty = userRoleData?.specialty;
-
-      // Fetch requests based on specialty and assignment
+      // Fetch requests based on assignment and pending
       let query = supabase
         .from('service_requests')
         .select(`
-          *,
-          profiles!service_requests_user_id_fkey (
-            first_name,
-            last_name,
-            email
-          )
+          *
         `)
         .order('created_at', { ascending: false });
 
-      if (technicianSpecialty) {
-        query = query.or(`assigned_technician_id.eq.${user.id},and(status.eq.pending,required_specialty.eq.${technicianSpecialty})`);
-      } else {
-        query = query.or(`assigned_technician_id.eq.${user.id},status.eq.pending`);
-      }
+      // Show assigned to me or pending
+      query = query.or(`assigned_technician_id.eq.${user.id},status.eq.pending`);
 
       const { data, error } = await query;
 

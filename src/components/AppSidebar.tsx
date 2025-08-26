@@ -50,7 +50,7 @@ const getNavigationItems = (role: string | null) => {
     { title: "Contacts", url: "/contacts", icon: Users },
     { title: "Sales Pipeline", url: "/sales-pipeline", icon: TrendingUp },
     { title: "Staff Management", url: "/staff-management", icon: Users },
-    { title: "Products", url: "/products", icon: Package },
+    
     { title: "Reports", url: "/reports", icon: BarChart3 },
     { title: "Calendar", url: "/calendar", icon: Calendar },
   ];
@@ -81,10 +81,8 @@ const getNavigationItems = (role: string | null) => {
       ];
     case "technician":
       return [
-        { title: "Dashboard", url: "/user-dashboard", icon: LayoutDashboard },
         { title: "Technician Dashboard", url: "/technician-dashboard", icon: HardHat },
         { title: "Job Requests", url: "/job-requests", icon: Briefcase },
-        ...inventoryItems,
         { title: "Calendar", url: "/calendar", icon: Calendar },
         { title: "Activity Log", url: "/activity", icon: Activity },
       ];
