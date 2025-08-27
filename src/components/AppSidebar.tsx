@@ -153,7 +153,7 @@ export function AppSidebar() {
   return (
     <Sidebar 
       className={`transition-all duration-300 bg-gradient-to-b from-card to-card/80 border-r border-border/40 ${
-        state === "collapsed" ? "w-20" : "w-64"
+        state === "collapsed" ? "w-30" : "w-64"
       }`}
       collapsible="icon"
     >

@@ -135,6 +135,9 @@ export const StaffManagement = () => {
   useEffect(() => {
     if (canManageStaff()) {
       fetchAllData();
+    } else {
+      setLoading(false);
+    
     }
   }, []);
 
