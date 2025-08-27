@@ -79,6 +79,14 @@ const getNavigationItems = (role: string | null) => {
         ...inventoryItems,
         ...adminItems,
       ];
+    case "ceo":
+    case "manager":
+      return [
+        { title: "Executive Dashboard", url: "/executive-dashboard", icon: BarChart3 },
+        ...crmItems.filter(item => item.title !== "Dashboard"),
+        { title: "Activity Log", url: "/activity", icon: Activity },
+        { title: "Notifications", url: "/notifications", icon: Bell },
+      ];
     case "technician":
       return [
         { title: "Technician Dashboard", url: "/technician-dashboard", icon: HardHat },
@@ -145,7 +153,7 @@ export function AppSidebar() {
   return (
     <Sidebar 
       className={`transition-all duration-300 bg-gradient-to-b from-card to-card/80 border-r border-border/40 ${
-        state === "collapsed" ? "w-16" : "w-64"
+        state === "collapsed" ? "w-20" : "w-64"
       }`}
       collapsible="icon"
     >

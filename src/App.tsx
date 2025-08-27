@@ -26,6 +26,7 @@ import EmailCampaigns from "./pages/EmailCampaigns";
 import NotFound from "./pages/NotFound";
 import Inventory from "./pages/Inventory";
 import Calendar from "./pages/Calendar";
+import ExecutiveDashboard from "./pages/ExecutiveDashboard";
 
 const queryClient = new QueryClient();
 
@@ -53,7 +54,7 @@ const App = () => (
           
           {/* CRM Routes - Sales team access */}
           <Route path="/contacts" element={
-            <ProtectedRoute allowedRoles={['admin', 'sales']}>
+            <ProtectedRoute allowedRoles={['admin', 'sales', 'manager', 'ceo']}>
               <Contacts />
             </ProtectedRoute>
           } />
@@ -63,22 +64,22 @@ const App = () => (
             </ProtectedRoute>
           } />
           <Route path="/sales-pipeline" element={
-            <ProtectedRoute allowedRoles={['admin', 'sales']}>
+            <ProtectedRoute allowedRoles={['admin', 'sales', 'manager', 'ceo']}>
               <SalesPipeline />
             </ProtectedRoute>
           } />
           <Route path="/products" element={
-            <ProtectedRoute allowedRoles={['admin', 'sales']}>
+            <ProtectedRoute allowedRoles={['admin', 'sales', 'manager', 'ceo']}>
               <Products />
             </ProtectedRoute>
           } />
           <Route path="/reports" element={
-            <ProtectedRoute allowedRoles={['admin', 'sales']}>
+            <ProtectedRoute allowedRoles={['admin', 'sales', 'manager', 'ceo']}>
               <Reports />
             </ProtectedRoute>
           } />
           <Route path="/email-campaigns" element={
-            <ProtectedRoute allowedRoles={['admin', 'sales']}>
+            <ProtectedRoute allowedRoles={['admin', 'sales', 'manager', 'ceo']}>
               <EmailCampaigns />
             </ProtectedRoute>
           } />
@@ -135,10 +136,18 @@ const App = () => (
             </ProtectedRoute>
           } />
           <Route path="/calendar" element={
-            <ProtectedRoute allowedRoles={['technician', 'admin', 'sales']}>
+            <ProtectedRoute allowedRoles={['technician', 'admin', 'sales', 'manager', 'ceo']}>
               <Calendar />
             </ProtectedRoute>
           } />
+          
+          {/* Executive Dashboard Route */}
+          <Route path="/executive-dashboard" element={
+            <ProtectedRoute allowedRoles={['ceo', 'manager']}>
+              <ExecutiveDashboard />
+            </ProtectedRoute>
+          } />
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
