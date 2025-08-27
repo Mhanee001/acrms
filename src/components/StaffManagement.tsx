@@ -122,6 +122,10 @@ export const StaffManagement = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingStaff, setEditingStaff] = useState<StaffMember | null>(null);
   const [activeTab, setActiveTab] = useState("staff");
+  const [hasLoadedRequests, setHasLoadedRequests] = useState(false);
+  const [hasLoadedAssets, setHasLoadedAssets] = useState(false);
+  const [hasLoadedActivity, setHasLoadedActivity] = useState(false);
+  const [hasLoadedNotifications, setHasLoadedNotifications] = useState(false);
   
   const [staffForm, setStaffForm] = useState({
     email: "",
@@ -141,16 +145,30 @@ export const StaffManagement = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (!canManageStaff()) return;
+    if (activeTab === 'requests' && !hasLoadedRequests) {
+      setHasLoadedRequests(true);
+      fetchServiceRequests();
+    }
+    if (activeTab === 'assets' && !hasLoadedAssets) {
+      setHasLoadedAssets(true);
+      fetchAssets();
+    }
+    if (activeTab === 'activity' && !hasLoadedActivity) {
+      setHasLoadedActivity(true);
+      fetchActivityLogs();
+    }
+    if (activeTab === 'notifications' && !hasLoadedNotifications) {
+      setHasLoadedNotifications(true);
+      fetchNotifications();
+    }
+  }, [activeTab, canManageStaff]);
+
   const fetchAllData = async () => {
     try {
       setLoading(true);
-      await Promise.all([
-        fetchStaff(),
-        fetchServiceRequests(),
-        fetchAssets(),
-        fetchActivityLogs(),
-        fetchNotifications()
-      ]);
+      await fetchStaff();
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -217,7 +235,8 @@ export const StaffManagement = () => {
           user:profiles!fk_service_requests_user_id(first_name, last_name, email),
           assigned_technician:profiles!fk_service_requests_assigned_technician_id(first_name, last_name)
         `)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(50);
 
       if (!error && data) {
         setServiceRequests(data);
@@ -242,7 +261,8 @@ export const StaffManagement = () => {
       const { data, error } = await supabase
         .from('assets')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(50);
 
       if (!error && data) {
         setAssets(data);
@@ -286,7 +306,8 @@ export const StaffManagement = () => {
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(50);
 
       if (!error && data) {
         setNotifications(data);
@@ -311,23 +332,70 @@ export const StaffManagement = () => {
 
       switch (dataType) {
         case 'staff':
-          data = staff;
+          {
+            const { data: staffFull, error } = await supabase
+              .from('profiles')
+              .select(`
+                id,
+                first_name,
+                last_name,
+                email,
+                created_at,
+                user_roles (
+                  role,
+                  specialty
+                )
+              `)
+              .order('created_at', { ascending: false });
+            data = staffFull || staff;
+          }
           filename = `staff_export_${new Date().toISOString().split('T')[0]}.json`;
           break;
         case 'requests':
-          data = serviceRequests;
+          {
+            const { data: requestsFull, error } = await supabase
+              .from('service_requests')
+              .select(`
+                *,
+                user:profiles!fk_service_requests_user_id(first_name, last_name, email),
+                assigned_technician:profiles!fk_service_requests_assigned_technician_id(first_name, last_name)
+              `)
+              .order('created_at', { ascending: false });
+            data = requestsFull || serviceRequests;
+          }
           filename = `service_requests_export_${new Date().toISOString().split('T')[0]}.json`;
           break;
         case 'assets':
-          data = assets;
+          {
+            const { data: assetsFull, error } = await supabase
+              .from('assets')
+              .select('*')
+              .order('created_at', { ascending: false });
+            data = assetsFull || assets;
+          }
           filename = `assets_export_${new Date().toISOString().split('T')[0]}.json`;
           break;
         case 'activity':
-          data = activityLogs;
+          {
+            const { data: activityFull, error } = await supabase
+              .from('activity_logs')
+              .select(`
+                *,
+                user:profiles!fk_activity_logs_user_id(first_name, last_name)
+              `)
+              .order('created_at', { ascending: false });
+            data = activityFull || activityLogs;
+          }
           filename = `activity_logs_export_${new Date().toISOString().split('T')[0]}.json`;
           break;
         case 'notifications':
-          data = notifications;
+          {
+            const { data: notificationsFull, error } = await supabase
+              .from('notifications')
+              .select('*')
+              .order('created_at', { ascending: false });
+            data = notificationsFull || notifications;
+          }
           filename = `notifications_export_${new Date().toISOString().split('T')[0]}.json`;
           break;
       }
@@ -460,7 +528,7 @@ export const StaffManagement = () => {
         description: "Staff role updated successfully"
       });
 
-      fetchAllData();
+      fetchStaff();
     } catch (error) {
       console.error('Error updating staff role:', error);
     }
@@ -484,7 +552,7 @@ export const StaffManagement = () => {
         description: "Staff member deleted successfully"
       });
 
-      fetchAllData();
+      fetchStaff();
     } catch (error) {
       console.error('Error deleting staff member:', error);
     }
