@@ -137,12 +137,13 @@ export const StaffManagement = () => {
   });
 
   useEffect(() => {
-    if (canManageStaff()) {
-      fetchAllData();
-    } else {
+    if (!canManageStaff()) return;
+    const load = async () => {
+      setLoading(true);
+      await fetchStaff();
       setLoading(false);
-    
-    }
+    };
+    load();
   }, []);
 
   useEffect(() => {
