@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { 
   TrendingUp, 
   Users, 
@@ -11,7 +13,9 @@ import {
   CheckCircle,
   Clock,
   AlertTriangle,
-  BarChart3
+  BarChart3,
+  MapPin,
+  Eye
 } from "lucide-react";
 import { formatCurrency } from "@/lib/currency";
 import { useAuth } from "@/hooks/useAuth";
@@ -32,6 +36,9 @@ const Dashboard = () => {
     pendingReviews: 0,
     totalSpent: 0
   });
+
+  const [serviceRequests, setServiceRequests] = useState<any[]>([]);
+  const [loadingRequests, setLoadingRequests] = useState(true);
 
   useEffect(() => {
     if (!user && !loading) {
@@ -97,6 +104,68 @@ const Dashboard = () => {
 
     fetchDashboardData();
   }, [user]);
+
+  // Fetch service requests for display
+  useEffect(() => {
+    const fetchServiceRequests = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('service_requests')
+          .select(`
+            *,
+            profiles!fk_service_requests_assigned_technician_id(first_name, last_name, email)
+          `)
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(5); // Show only the 5 most recent requests
+
+        if (error) {
+          console.error('Error fetching service requests:', error);
+          return;
+        }
+
+        setServiceRequests(data || []);
+      } catch (error) {
+        console.error('Error fetching service requests:', error);
+      } finally {
+        setLoadingRequests(false);
+      }
+    };
+
+    fetchServiceRequests();
+  }, [user]);
+
+  // Helper functions for status and priority colors
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "pending": return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
+      case "assigned": return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
+      case "in_progress": return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300";
+      case "completed": return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+      case "cancelled": return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
+      default: return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "urgent": return "destructive";
+      case "high": return "destructive";
+      case "medium": return "default";
+      case "low": return "secondary";
+      default: return "default";
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
 
   // CONDITIONAL RENDERING AFTER ALL HOOKS ARE CALLED
   if (loading || roleLoading) {
@@ -199,6 +268,110 @@ const Dashboard = () => {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Recent Service Requests */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-foreground">Recent Service Requests</h2>
+              <p className="text-muted-foreground">Your latest service requests and their current status</p>
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/my-requests')}
+              className="flex items-center gap-2"
+            >
+              <Eye className="h-4 w-4" />
+              View All
+            </Button>
+          </div>
+
+          {loadingRequests ? (
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  <span className="ml-2 text-muted-foreground">Loading requests...</span>
+                </div>
+              </CardContent>
+            </Card>
+          ) : serviceRequests.length === 0 ? (
+            <Card>
+              <CardContent className="p-6">
+                <div className="text-center py-8">
+                  <Wrench className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-foreground mb-2">No service requests yet</h3>
+                  <p className="text-muted-foreground mb-4">Create your first service request to get started</p>
+                  <Button onClick={() => navigate('/service-request')}>
+                    Create Service Request
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4">
+              {serviceRequests.map((request) => (
+                <Card key={request.id} className="card-hover">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 space-y-3">
+                        <div className="flex items-center gap-3">
+                          <h3 className="text-lg font-semibold text-foreground">{request.title}</h3>
+                          <Badge variant={getPriorityColor(request.priority)} className="text-xs">
+                            {request.priority}
+                          </Badge>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
+                            {request.status.replace('_', ' ')}
+                          </span>
+                        </div>
+                        
+                        <p className="text-muted-foreground text-sm line-clamp-2">
+                          {request.description || 'No description provided'}
+                        </p>
+                        
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Wrench className="h-4 w-4" />
+                            <span>{request.job_type}</span>
+                          </div>
+                          {request.location && (
+                            <div className="flex items-center gap-1">
+                              <MapPin className="h-4 w-4" />
+                              <span>{request.location}</span>
+                            </div>
+                          )}
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            <span>{formatDate(request.created_at)}</span>
+                          </div>
+                        </div>
+
+                        {request.profiles && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <span className="text-muted-foreground">Assigned to:</span>
+                            <span className="font-medium">
+                              {request.profiles.first_name} {request.profiles.last_name}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => navigate(`/my-requests`)}
+                        className="flex items-center gap-1"
+                      >
+                        <Eye className="h-4 w-4" />
+                        View
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
 
       </div>

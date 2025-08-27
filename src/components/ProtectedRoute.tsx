@@ -51,6 +51,10 @@ export const ProtectedRoute = ({
           case 'sales':
             navigate('/user-dashboard');
             break;
+          case 'manager':
+          case 'ceo':
+            navigate('/executive-dashboard');
+            break;
           default:
             navigate('/user-dashboard');
         }

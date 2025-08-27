@@ -116,7 +116,7 @@ const Auth = () => {
             style={{ zIndex: 2 }}
           >
             <ArrowLeft className="h-4 w-4" />
-            <span className="text-sm">Back to Home</span>
+            <span className="text-sm">Back</span>
           </Link>
           <div className="flex items-center justify-center space-x-2 mb-4">
             
@@ -132,7 +132,7 @@ const Auth = () => {
             </CardTitle>
             <CardDescription>
               {mode === "login" && "Sign in to your acrms account"}
-              {mode === "signup" && "Get started with your hardware maintenance CRM"}
+              {mode === "signup" && "Get started with ACRMS"}
               {mode === "forgot" && "Enter your email to receive a password reset link"}
             </CardDescription>
           </CardHeader>
@@ -184,7 +184,7 @@ const Auth = () => {
                         <FormItem>
                           <FormLabel>First Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="John" {...field} />
+                            <Input placeholder="" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -197,7 +197,7 @@ const Auth = () => {
                         <FormItem>
                           <FormLabel>Last Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="Doe" {...field} />
+                            <Input placeholder="" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -211,7 +211,7 @@ const Auth = () => {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input type="email" placeholder="john@example.com" {...field} />
+                          <Input type="email" placeholder="" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

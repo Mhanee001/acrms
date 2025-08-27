@@ -50,7 +50,7 @@ const getNavigationItems = (role: string | null) => {
     { title: "Contacts", url: "/contacts", icon: Users },
     { title: "Sales Pipeline", url: "/sales-pipeline", icon: TrendingUp },
     { title: "Staff Management", url: "/staff-management", icon: Users },
-    { title: "Products", url: "/products", icon: Package },
+    
     { title: "Reports", url: "/reports", icon: BarChart3 },
     { title: "Calendar", url: "/calendar", icon: Calendar },
   ];
@@ -79,12 +79,18 @@ const getNavigationItems = (role: string | null) => {
         ...inventoryItems,
         ...adminItems,
       ];
+    case "ceo":
+    case "manager":
+      return [
+        { title: "Executive Dashboard", url: "/executive-dashboard", icon: BarChart3 },
+        ...crmItems.filter(item => item.title !== "Dashboard"),
+        { title: "Activity Log", url: "/activity", icon: Activity },
+        { title: "Notifications", url: "/notifications", icon: Bell },
+      ];
     case "technician":
       return [
-        { title: "Dashboard", url: "/user-dashboard", icon: LayoutDashboard },
         { title: "Technician Dashboard", url: "/technician-dashboard", icon: HardHat },
         { title: "Job Requests", url: "/job-requests", icon: Briefcase },
-        ...inventoryItems,
         { title: "Calendar", url: "/calendar", icon: Calendar },
         { title: "Activity Log", url: "/activity", icon: Activity },
       ];
@@ -147,7 +153,7 @@ export function AppSidebar() {
   return (
     <Sidebar 
       className={`transition-all duration-300 bg-gradient-to-b from-card to-card/80 border-r border-border/40 ${
-        state === "collapsed" ? "w-16" : "w-64"
+        state === "collapsed" ? "w-20" : "w-64"
       }`}
       collapsible="icon"
     >
@@ -165,7 +171,7 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-2 py-4">
+      <SidebarContent className={`py-4 ${state === "collapsed" ? "px-2" : "px-3"}`}>
         <SidebarGroup>
           {state !== "collapsed" && (
             <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider mb-2">
@@ -185,7 +191,7 @@ export function AppSidebar() {
                         ? 'bg-primary/10 text-primary border border-primary/20 shadow-sm' 
                         : 'hover:bg-muted/60 hover:text-foreground border border-transparent'
                       }
-                      ${state === "collapsed" ? 'justify-center p-3' : 'px-3 py-2.5'}
+                      ${state === "collapsed" ? 'justify-center p-2 mx-1' : 'px-3 py-2.5'}
                     `}
                   >
                     <Link to={item.url} className="flex items-center w-full">

@@ -14,37 +14,104 @@ import {
   MapPin,
   Building,
   Calendar,
-  MoreHorizontal
+  MoreHorizontal,
+  Loader2
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
+import { supabase } from "@/integrations/supabase/client";
+import { AddContactDialog } from "@/components/AddContactDialog";
+
+interface Contact {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string;
+  phone: string | null;
+  company: string | null;
+  position: string | null;
+  bio: string | null;
+  avatar_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
 const Contacts = () => {
+  const { user } = useAuth();
+  const { role } = useUserRole();
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showAddDialog, setShowAddDialog] = useState(false);
 
-  const contacts = [
-    {
-      id: 1,
-      name: "John Smith",
-      email: "john.smith@acme.com",
-      phone: "+1 (555) 123-4567",
-      company: "Acme Corp",
-      position: "CEO",
-      location: "New York, NY",
-      status: "active",
-      lastContact: "2024-01-15"
-    },
-    {
-      id: 2,
-      name: "Sarah Johnson",
-      email: "sarah@techstart.io",
-      phone: "+1 (555) 987-6543",
-      company: "TechStart",
-      position: "CTO",
-      location: "San Francisco, CA",
-      status: "prospect",
-      lastContact: "2024-01-10"
+  const isAdmin = role === 'admin';
+
+  useEffect(() => {
+    fetchContacts();
+  }, []);
+
+  const fetchContacts = async () => {
+    try {
+      setLoading(true);
+      
+      // If admin, fetch all profiles, otherwise fetch only the current user's profile
+      const query = supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error fetching contacts:', error);
+        return;
+      }
+
+      setContacts(data || []);
+    } catch (error) {
+      console.error('Error fetching contacts:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const filteredContacts = contacts.filter(contact => {
+    const fullName = `${contact.first_name || ''} ${contact.last_name || ''}`.toLowerCase();
+    const email = contact.email.toLowerCase();
+    const company = contact.company?.toLowerCase() || '';
+    const position = contact.position?.toLowerCase() || '';
+    
+    return fullName.includes(searchTerm.toLowerCase()) ||
+           email.includes(searchTerm.toLowerCase()) ||
+           company.includes(searchTerm.toLowerCase()) ||
+           position.includes(searchTerm.toLowerCase());
+  });
+
+  const handleContactAdded = () => {
+    setShowAddDialog(false);
+    fetchContacts(); // Refresh the list
+  };
+
+  const getFullName = (contact: Contact) => {
+    const firstName = contact.first_name || '';
+    const lastName = contact.last_name || '';
+    return `${firstName} ${lastName}`.trim() || 'Unknown User';
+  };
+
+  const getInitials = (contact: Contact) => {
+    const firstName = contact.first_name || '';
+    const lastName = contact.last_name || '';
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || 'U';
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
 
   return (
     <Layout showSidebar={true}>
@@ -53,12 +120,16 @@ const Contacts = () => {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-3xl font-bold">Contacts</h2>
-            <p className="text-muted-foreground">Manage your customer relationships</p>
+            <p className="text-muted-foreground">
+              {isAdmin ? 'Manage all user contacts' : 'View your contact information'}
+            </p>
           </div>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Contact
-          </Button>
+          {isAdmin && (
+            <Button onClick={() => setShowAddDialog(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Contact
+            </Button>
+          )}
         </div>
 
         {/* Search and Filters */}
@@ -85,75 +156,115 @@ const Contacts = () => {
         </Card>
 
         {/* Contacts Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {contacts.map((contact) => (
-            <Card key={contact.id} className="hover:shadow-md transition-shadow">
-              <CardHeader className="pb-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Avatar>
-                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${contact.name}`} />
-                      <AvatarFallback>
-                        {contact.name.split(" ").map(n => n[0]).join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <CardTitle className="text-lg">{contact.name}</CardTitle>
-                      <CardDescription>{contact.position}</CardDescription>
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <span className="ml-2 text-muted-foreground">Loading contacts...</span>
+          </div>
+        ) : filteredContacts.length === 0 ? (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2">No contacts found</h3>
+              <p className="text-muted-foreground mb-4">
+                {searchTerm ? 'Try adjusting your search terms' : 'No contacts available yet'}
+              </p>
+              {isAdmin && !searchTerm && (
+                <Button onClick={() => setShowAddDialog(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add First Contact
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredContacts.map((contact) => (
+              <Card key={contact.id} className="hover:shadow-md transition-shadow">
+                <CardHeader className="pb-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Avatar>
+                        <AvatarImage src={contact.avatar_url || undefined} />
+                        <AvatarFallback>
+                          {getInitials(contact)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <CardTitle className="text-lg">{getFullName(contact)}</CardTitle>
+                        <CardDescription>{contact.position || 'No position'}</CardDescription>
+                      </div>
                     </div>
+                    <Button variant="ghost" size="sm">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
                   </div>
-                  <Button variant="ghost" size="sm">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Badge variant={contact.status === "active" ? "default" : "secondary"}>
-                    {contact.status}
-                  </Badge>
-                  <span className="text-sm text-muted-foreground">
-                    Last contact: {contact.lastContact}
-                  </span>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2 text-sm">
-                    <Building className="h-4 w-4 text-muted-foreground" />
-                    <span>{contact.company}</span>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Badge variant="default">
+                      Active
+                    </Badge>
+                    <span className="text-sm text-muted-foreground">
+                      Joined: {formatDate(contact.created_at)}
+                    </span>
                   </div>
-                  <div className="flex items-center space-x-2 text-sm">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <span>{contact.email}</span>
+                  
+                  <div className="space-y-2">
+                    {contact.company && (
+                      <div className="flex items-center space-x-2 text-sm">
+                        <Building className="h-4 w-4 text-muted-foreground" />
+                        <span>{contact.company}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center space-x-2 text-sm">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <span>{contact.email}</span>
+                    </div>
+                    {contact.phone && (
+                      <div className="flex items-center space-x-2 text-sm">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        <span>{contact.phone}</span>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center space-x-2 text-sm">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <span>{contact.phone}</span>
-                  </div>
-                  <div className="flex items-center space-x-2 text-sm">
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
-                    <span>{contact.location}</span>
-                  </div>
-                </div>
 
-                <div className="flex space-x-2 pt-2">
-                  <Button size="sm" variant="outline" className="flex-1">
-                    <Mail className="h-3 w-3 mr-1" />
-                    Email
-                  </Button>
-                  <Button size="sm" variant="outline" className="flex-1">
-                    <Phone className="h-3 w-3 mr-1" />
-                    Call
-                  </Button>
-                  <Button size="sm" variant="outline" className="flex-1">
-                    <Calendar className="h-3 w-3 mr-1" />
-                    Meet
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                  {contact.bio && (
+                    <div className="text-sm text-muted-foreground">
+                      <p className="line-clamp-2">{contact.bio}</p>
+                    </div>
+                  )}
+
+                  <div className="flex space-x-2 pt-2">
+                    <Button size="sm" variant="outline" className="flex-1">
+                      <Mail className="h-3 w-3 mr-1" />
+                      Email
+                    </Button>
+                    {contact.phone && (
+                      <Button size="sm" variant="outline" className="flex-1">
+                        <Phone className="h-3 w-3 mr-1" />
+                        Call
+                      </Button>
+                    )}
+                    <Button size="sm" variant="outline" className="flex-1">
+                      <Calendar className="h-3 w-3 mr-1" />
+                      Meet
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* Add Contact Dialog */}
+        {isAdmin && (
+          <AddContactDialog 
+            open={showAddDialog} 
+            onOpenChange={setShowAddDialog}
+            onContactAdded={handleContactAdded}
+          />
+        )}
       </div>
     </Layout>
   );

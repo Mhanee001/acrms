@@ -53,6 +53,14 @@ export const ServiceRequestsList = () => {
   useEffect(() => {
     if (user) {
       fetchServiceRequests();
+      // realtime: refresh on changes
+      const channel = supabase
+        .channel('service_requests_realtime')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'service_requests' }, () => {
+          fetchServiceRequests();
+        })
+        .subscribe();
+      return () => { supabase.removeChannel(channel); };
     }
   }, [user, role]);
 
@@ -63,12 +71,7 @@ export const ServiceRequestsList = () => {
       let query = supabase
         .from('service_requests')
         .select(`
-          *,
-          profiles (
-            first_name,
-            last_name,
-            email
-          )
+          *
         `)
         .order('created_at', { ascending: false });
 
@@ -76,22 +79,8 @@ export const ServiceRequestsList = () => {
       if (role === 'user') {
         query = query.eq('user_id', user.id);
       } else if (role === 'technician') {
-        // For technicians, show only requests that match their specialty or are assigned to them
-        // First get the technician's specialty
-        const { data: userRoleData } = await supabase
-          .from('user_roles')
-          .select('specialty')
-          .eq('user_id', user.id)
-          .single();
-        
-        const technicianSpecialty = userRoleData?.specialty;
-        
-        if (technicianSpecialty) {
-          query = query.or(`assigned_technician_id.eq.${user.id},and(status.eq.pending,required_specialty.eq.${technicianSpecialty})`);
-        } else {
-          // If no specialty, show assigned tasks and all pending requests
-          query = query.or(`assigned_technician_id.eq.${user.id},status.eq.pending`);
-        }
+        // Show requests assigned to the technician OR any pending requests
+        query = query.or(`assigned_technician_id.eq.${user.id},status.eq.pending`);
       }
 
       const { data, error } = await query;
@@ -158,7 +147,7 @@ export const ServiceRequestsList = () => {
   const filteredRequests = requests.filter(request => {
     const matchesSearch = request.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          request.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         request.profiles?.email.toLowerCase().includes(searchTerm.toLowerCase());
+                         request.profiles?.email?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || request.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || request.priority === priorityFilter;
     return matchesSearch && matchesStatus && matchesPriority;

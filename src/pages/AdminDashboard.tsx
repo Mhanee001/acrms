@@ -137,12 +137,47 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleAssignRequest = (requestId: string, technicianId: string) => {
-    const technician = technicians.find(t => t.id === technicianId);
-    toast({
-      title: "Request Assigned",
-      description: `Request ${requestId} has been assigned to ${technician?.name}`,
-    });
+  const handleAssignRequest = async (requestId: string, technicianId: string) => {
+    try {
+      const technician = technicians.find(t => t.id === technicianId);
+
+      // Persist assignment in DB
+      const { error: updateError } = await supabase
+        .from('service_requests')
+        .update({ assigned_technician_id: technicianId, status: 'assigned' })
+        .eq('id', requestId);
+
+      if (updateError) {
+        console.error('Error assigning request:', updateError);
+        toast({ title: 'Error', description: 'Failed to assign request', variant: 'destructive' });
+        return;
+      }
+
+      // Optimistically update local UI state
+      setRequests(prev => prev.map(r => r.id === requestId 
+        ? { ...r, status: 'assigned', assignedTo: technician?.name || null }
+        : r
+      ));
+
+      // Notify the technician
+      if (technicianId) {
+        await supabase.from('notifications').insert({
+          user_id: technicianId,
+          title: 'New Task Assigned',
+          message: `You have been assigned to request ${requestId}${technician?.name ? ' by admin' : ''}.`,
+          type: 'info',
+          read: false,
+        });
+      }
+
+      toast({
+        title: 'Request Assigned',
+        description: `Request ${requestId} has been assigned to ${technician?.name || 'technician'}`,
+      });
+    } catch (e) {
+      console.error('Unexpected error assigning request:', e);
+      toast({ title: 'Error', description: 'Unexpected error assigning request', variant: 'destructive' });
+    }
   };
 
   const handleUserStatusChange = (userId: string, newStatus: string) => {
@@ -443,6 +478,9 @@ const AdminDashboard = () => {
                         <SelectItem value="all">All Roles</SelectItem>
                         <SelectItem value="user">Users</SelectItem>
                         <SelectItem value="technician">Technicians</SelectItem>
+                        <SelectItem value="sales">Sales</SelectItem>
+                        <SelectItem value="manager">Managers</SelectItem>
+                        <SelectItem value="ceo">CEOs</SelectItem>
                         <SelectItem value="admin">Admins</SelectItem>
                       </SelectContent>
                     </Select>

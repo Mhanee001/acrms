@@ -35,7 +35,7 @@ const Landing = () => {
                 <Link to="/auth">Login</Link>
               </Button>
               <Button asChild className="hover-float animate-pulse-glow">
-                <Link to="/auth?mode=signup">Get Started</Link>
+                <Link to="/auth?mode=signup">SignUp</Link>
               </Button>
             </div>
           </div>
@@ -82,12 +82,12 @@ const Landing = () => {
             <div className="animate-fade-in-up flex flex-col sm:flex-row items-center justify-center gap-6" style={{animationDelay: '0.4s'}}>
               <Button size="lg" asChild className="group hover-float text-lg px-8 py-4">
                 <Link to="/auth?mode=signup">
-                  Start Free Trial
+                  Get Started
                   <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
               <Button variant="outline" size="lg" asChild className="hover-glow text-lg px-8 py-4">
-                <Link to="/auth">Login to Dashboard</Link>
+                <Link to="/auth">Login</Link>
               </Button>
             </div>
             

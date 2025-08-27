@@ -22,6 +22,13 @@ const Index = () => {
         case 'admin':
           navigate("/dashboard");
           break;
+        case 'manager':
+        case 'ceo':
+          navigate("/executive-dashboard");
+          break;
+        case 'sales':
+          navigate("/user-dashboard");
+          break;
         default:
           navigate("/user-dashboard");
       }
