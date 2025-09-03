@@ -136,6 +136,60 @@ export type Database = {
         }
         Relationships: []
       }
+      inventory: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          last_updated: string
+          location: string | null
+          min_stock_level: number
+          name: string
+          quantity: number
+          status: string
+          supplier: string | null
+          unit_price: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          last_updated?: string
+          location?: string | null
+          min_stock_level?: number
+          name: string
+          quantity?: number
+          status?: string
+          supplier?: string | null
+          unit_price?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          last_updated?: string
+          location?: string | null
+          min_stock_level?: number
+          name?: string
+          quantity?: number
+          status?: string
+          supplier?: string | null
+          unit_price?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -172,10 +226,15 @@ export type Database = {
           bio: string | null
           company: string | null
           created_at: string
+          department: string | null
           email: string
+          emergency_contact: string | null
           first_name: string | null
           id: string
           last_name: string | null
+          linkedin_url: string | null
+          location: string | null
+          office_extension: string | null
           phone: string | null
           position: string | null
           updated_at: string
@@ -185,10 +244,15 @@ export type Database = {
           bio?: string | null
           company?: string | null
           created_at?: string
+          department?: string | null
           email: string
+          emergency_contact?: string | null
           first_name?: string | null
           id: string
           last_name?: string | null
+          linkedin_url?: string | null
+          location?: string | null
+          office_extension?: string | null
           phone?: string | null
           position?: string | null
           updated_at?: string
@@ -198,10 +262,15 @@ export type Database = {
           bio?: string | null
           company?: string | null
           created_at?: string
+          department?: string | null
           email?: string
+          emergency_contact?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null
+          linkedin_url?: string | null
+          location?: string | null
+          office_extension?: string | null
           phone?: string | null
           position?: string | null
           updated_at?: string

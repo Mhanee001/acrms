@@ -1,11 +1,14 @@
 import { supabase } from "@/integrations/supabase/client";
+import { Database } from '@/integrations/supabase/types';
+
+type UserRole = Database['public']['Enums']['app_role'];
 
 export interface NotificationData {
   title: string;
   message: string;
   type: 'info' | 'success' | 'warning' | 'error';
   user_id?: string;
-  target_roles?: string[];
+  target_roles?: UserRole[];
 }
 
 export class NotificationService {
@@ -39,7 +42,7 @@ export class NotificationService {
   /**
    * Create notifications for users with specific roles
    */
-  static async createNotificationForRoles(data: NotificationData & { target_roles: string[] }) {
+  static async createNotificationForRoles(data: NotificationData & { target_roles: UserRole[] }) {
     try {
       // Get all users with the specified roles
       const { data: users, error: fetchError } = await supabase
@@ -90,11 +93,11 @@ export class NotificationService {
     user_id: string;
     description?: string;
   }) {
-    const notificationData: NotificationData = {
+    const notificationData = {
       title: 'New Service Request',
       message: `A new service request "${requestData.title}" has been created and requires attention.`,
-      type: 'info',
-      target_roles: ['admin', 'technician', 'manager']
+      type: 'info' as const,
+      target_roles: ['admin', 'technician', 'manager'] as UserRole[]
     };
 
     return await this.createNotificationForRoles(notificationData);
@@ -110,10 +113,10 @@ export class NotificationService {
     status: string;
     updated_by?: string;
   }) {
-    const notificationData: NotificationData = {
+    const notificationData = {
       title: 'Service Request Updated',
       message: `Your service request "${requestData.title}" has been updated to status: ${requestData.status}.`,
-      type: 'info',
+      type: 'info' as const,
       user_id: requestData.user_id
     };
 
@@ -129,10 +132,10 @@ export class NotificationService {
     user_id: string;
     assigned_by?: string;
   }) {
-    const notificationData: NotificationData = {
+    const notificationData = {
       title: 'Asset Assigned',
       message: `Asset "${assetData.name}" has been assigned to you.`,
-      type: 'success',
+      type: 'success' as const,
       user_id: assetData.user_id
     };
 
@@ -148,10 +151,10 @@ export class NotificationService {
     user_id: string;
     scheduled_date: string;
   }) {
-    const notificationData: NotificationData = {
+    const notificationData = {
       title: 'Maintenance Scheduled',
       message: `Maintenance for asset "${maintenanceData.asset_name}" is scheduled for ${new Date(maintenanceData.scheduled_date).toLocaleDateString()}.`,
-      type: 'warning',
+      type: 'warning' as const,
       user_id: maintenanceData.user_id
     };
 
@@ -165,7 +168,7 @@ export class NotificationService {
     title: string;
     message: string;
     severity: 'info' | 'warning' | 'error';
-    target_roles?: string[];
+    target_roles?: UserRole[];
   }) {
     if (alertData.target_roles) {
       return await this.createNotificationForRoles({
