@@ -45,7 +45,7 @@ const Contacts = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
 
-  const isAdmin = role === 'admin';
+  const canManageContacts = role === 'admin' || role === 'ceo' || role === 'manager';
 
   useEffect(() => {
     fetchContacts();
@@ -55,7 +55,7 @@ const Contacts = () => {
     try {
       setLoading(true);
       
-      // If admin, fetch all profiles, otherwise fetch only the current user's profile
+      // If manager/admin/ceo, fetch all profiles, otherwise fetch only the current user's profile
       const query = supabase
         .from('profiles')
         .select('*')
@@ -121,10 +121,10 @@ const Contacts = () => {
           <div>
             <h2 className="text-3xl font-bold">Contacts</h2>
             <p className="text-muted-foreground">
-              {isAdmin ? 'Manage all user contacts' : 'View your contact information'}
+              {canManageContacts ? 'Manage all user contacts' : 'View your contact information'}
             </p>
           </div>
-          {isAdmin && (
+          {canManageContacts && (
             <Button onClick={() => setShowAddDialog(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Add Contact
@@ -169,7 +169,7 @@ const Contacts = () => {
               <p className="text-muted-foreground mb-4">
                 {searchTerm ? 'Try adjusting your search terms' : 'No contacts available yet'}
               </p>
-              {isAdmin && !searchTerm && (
+              {canManageContacts && !searchTerm && (
                 <Button onClick={() => setShowAddDialog(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add First Contact
@@ -258,7 +258,7 @@ const Contacts = () => {
         )}
 
         {/* Add Contact Dialog */}
-        {isAdmin && (
+        {canManageContacts && (
           <AddContactDialog 
             open={showAddDialog} 
             onOpenChange={setShowAddDialog}
