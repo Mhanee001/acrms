@@ -90,7 +90,7 @@ interface DashboardStats {
 export const StaffManagement = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { canManageStaff } = useRoleAccess();
+  const { canManageStaff, role } = useRoleAccess();
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [serviceRequests, setServiceRequests] = useState<ServiceRequest[]>([]);
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -141,9 +141,8 @@ export const StaffManagement = () => {
       fetchAllData();
     } else {
       setLoading(false);
-    
     }
-  }, []);
+  }, [role, canManageStaff]);
 
   useEffect(() => {
     if (!canManageStaff()) return;
@@ -178,27 +177,35 @@ export const StaffManagement = () => {
 
   const fetchStaff = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select(`
-          id,
-          first_name,
-          last_name,
-          email,
-          created_at,
-          user_roles (
-            role,
-            specialty
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching staff:', error);
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
         return;
       }
 
-      const staffData = data || [];
+      // Fetch user roles separately
+      const { data: rolesData, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('*');
+
+      if (rolesError) {
+        console.error('Error fetching roles:', rolesError);
+        return;
+      }
+
+      // Combine profiles with their roles
+      const staffData = (profilesData || []).map(profile => {
+        const userRole = rolesData?.find(role => role.user_id === profile.id);
+        return {
+          ...profile,
+          user_roles: userRole ? [userRole] : [{ role: 'user', specialty: null }]
+        };
+      });
+
       setStaff(staffData);
       setDashboardStats(prev => ({ ...prev, totalUsers: staffData.length }));
       

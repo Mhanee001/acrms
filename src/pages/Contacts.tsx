@@ -49,17 +49,18 @@ const Contacts = () => {
 
   useEffect(() => {
     fetchContacts();
-  }, []);
+  }, [canManageContacts, role]);
 
   const fetchContacts = async () => {
     try {
       setLoading(true);
       
-      // If manager/admin/ceo, fetch all profiles, otherwise fetch only the current user's profile
-      const query = supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+      let query = supabase.from('profiles').select('*').order('created_at', { ascending: false });
+      
+      // If user doesn't have management permissions, only fetch their own profile
+      if (!canManageContacts) {
+        query = query.eq('id', user?.id);
+      }
 
       const { data, error } = await query;
 
