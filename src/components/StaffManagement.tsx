@@ -142,7 +142,7 @@ export const StaffManagement = () => {
     } else {
       setLoading(false);
     }
-  }, [role, canManageStaff]);
+  }, [role]);
 
   useEffect(() => {
     if (!canManageStaff()) return;
