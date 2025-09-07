@@ -19,6 +19,17 @@ interface StaffMember {
   first_name: string | null;
   last_name: string | null;
   email: string;
+  phone: string | null;
+  bio: string | null;
+  company: string | null;
+  position: string | null;
+  department: string | null;
+  location: string | null;
+  linkedin_url: string | null;
+  emergency_contact: string | null;
+  office_extension: string | null;
+  avatar_url: string | null;
+  updated_at: string;
   user_roles: { role: string; specialty?: string }[];
   created_at: string;
 }
@@ -683,13 +694,134 @@ export const StaffManagement = () => {
 
         {/* Staff Management Tab */}
         <TabsContent value="staff" className="space-y-4">
+          {/* Header with Search and Add Button */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4 flex-1 max-w-md">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search staff by name or email..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Select value={roleFilter} onValueChange={setRoleFilter}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Filter by role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Roles</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="ceo">CEO</SelectItem>
+                  <SelectItem value="manager">Manager</SelectItem>
+                  <SelectItem value="technician">Technician</SelectItem>
+                  <SelectItem value="sales">Sales</SelectItem>
+                  <SelectItem value="user">User</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Add Staff
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle>Create New Staff Member</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="first_name">First Name</Label>
+                      <Input
+                        id="first_name"
+                        value={staffForm.first_name}
+                        onChange={(e) => setStaffForm({ ...staffForm, first_name: e.target.value })}
+                        placeholder="Enter first name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="last_name">Last Name</Label>
+                      <Input
+                        id="last_name"
+                        value={staffForm.last_name}
+                        onChange={(e) => setStaffForm({ ...staffForm, last_name: e.target.value })}
+                        placeholder="Enter last name"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={staffForm.email}
+                      onChange={(e) => setStaffForm({ ...staffForm, email: e.target.value })}
+                      placeholder="Enter email address"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="password">Temporary Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={staffForm.password}
+                      onChange={(e) => setStaffForm({ ...staffForm, password: e.target.value })}
+                      placeholder="Enter temporary password"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="role">Role</Label>
+                      <Select value={staffForm.role} onValueChange={(value) => setStaffForm({ ...staffForm, role: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="user">User</SelectItem>
+                          <SelectItem value="technician">Technician</SelectItem>
+                          <SelectItem value="sales">Sales</SelectItem>
+                          <SelectItem value="manager">Manager</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                          <SelectItem value="ceo">CEO</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {staffForm.role === 'technician' && (
+                      <div>
+                        <Label htmlFor="specialty">Specialty</Label>
+                        <Input
+                          id="specialty"
+                          value={staffForm.specialty}
+                          onChange={(e) => setStaffForm({ ...staffForm, specialty: e.target.value })}
+                          placeholder="e.g., Hardware, Software"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex justify-end space-x-2 pt-4">
+                    <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={createStaffMember}>
+                      Create Staff Member
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+
           {/* Statistics Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Total</p>
+                    <p className="text-sm font-medium text-muted-foreground">Total Staff</p>
                     <p className="text-2xl font-bold">{roleStats.total}</p>
                   </div>
                   <Users className="h-6 w-6 text-muted-foreground" />
@@ -832,29 +964,95 @@ export const StaffManagement = () => {
                           <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-full font-semibold">
                             {member.first_name?.[0] || member.email[0].toUpperCase()}
                           </div>
-                          <div className="space-y-1">
-                            <div className="flex items-center space-x-2">
-                              <h3 className="font-semibold text-lg">
-                                {member.first_name} {member.last_name} 
-                                {!member.first_name && !member.last_name && 'Unnamed User'}
-                              </h3>
-                              <div className="flex items-center space-x-1">
-                                <RoleIcon className="h-4 w-4" />
-                                <Badge variant={getRoleColor(role) as any}>
-                                  {role}
-                                </Badge>
-                                {role === 'technician' && member.user_roles[0]?.specialty && (
-                                  <Badge variant="outline">
-                                    {member.user_roles[0].specialty}
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                            <p className="text-sm text-muted-foreground">{member.email}</p>
-                            <p className="text-xs text-muted-foreground">
-                              Joined: {new Date(member.created_at).toLocaleDateString()}
-                            </p>
-                          </div>
+                           <div className="space-y-2">
+                             <div className="flex items-center space-x-2">
+                               <h3 className="font-semibold text-lg">
+                                 {member.first_name} {member.last_name} 
+                                 {!member.first_name && !member.last_name && 'Unnamed User'}
+                               </h3>
+                               <div className="flex items-center space-x-1">
+                                 <RoleIcon className="h-4 w-4" />
+                                 <Badge variant={getRoleColor(role) as any}>
+                                   {role}
+                                 </Badge>
+                                 {role === 'technician' && member.user_roles[0]?.specialty && (
+                                   <Badge variant="outline">
+                                     {member.user_roles[0].specialty}
+                                   </Badge>
+                                 )}
+                               </div>
+                             </div>
+                             
+                             {/* Contact Information */}
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">
+                               <div className="space-y-1">
+                                 <div className="flex items-center text-sm">
+                                   <span className="text-muted-foreground w-16">Email:</span>
+                                   <span className="font-medium">{member.email}</span>
+                                 </div>
+                                 {member.phone && (
+                                   <div className="flex items-center text-sm">
+                                     <span className="text-muted-foreground w-16">Phone:</span>
+                                     <span>{member.phone}</span>
+                                   </div>
+                                 )}
+                                 {member.position && (
+                                   <div className="flex items-center text-sm">
+                                     <span className="text-muted-foreground w-16">Position:</span>
+                                     <span>{member.position}</span>
+                                   </div>
+                                 )}
+                                 {member.department && (
+                                   <div className="flex items-center text-sm">
+                                     <span className="text-muted-foreground w-16">Dept:</span>
+                                     <span>{member.department}</span>
+                                   </div>
+                                 )}
+                               </div>
+                               <div className="space-y-1">
+                                 {member.company && (
+                                   <div className="flex items-center text-sm">
+                                     <span className="text-muted-foreground w-16">Company:</span>
+                                     <span>{member.company}</span>
+                                   </div>
+                                 )}
+                                 {member.location && (
+                                   <div className="flex items-center text-sm">
+                                     <span className="text-muted-foreground w-16">Location:</span>
+                                     <span>{member.location}</span>
+                                   </div>
+                                 )}
+                                 {member.office_extension && (
+                                   <div className="flex items-center text-sm">
+                                     <span className="text-muted-foreground w-16">Ext:</span>
+                                     <span>{member.office_extension}</span>
+                                   </div>
+                                 )}
+                                 {member.emergency_contact && (
+                                   <div className="flex items-center text-sm">
+                                     <span className="text-muted-foreground w-16">Emergency:</span>
+                                     <span className="text-xs">{member.emergency_contact}</span>
+                                   </div>
+                                 )}
+                               </div>
+                             </div>
+                             
+                             <div className="flex items-center justify-between pt-2 border-t">
+                               <p className="text-xs text-muted-foreground">
+                                 Joined: {new Date(member.created_at).toLocaleDateString()}
+                               </p>
+                               {member.linkedin_url && (
+                                 <a 
+                                   href={member.linkedin_url} 
+                                   target="_blank" 
+                                   rel="noopener noreferrer"
+                                   className="text-xs text-blue-600 hover:underline"
+                                 >
+                                   LinkedIn Profile
+                                 </a>
+                               )}
+                             </div>
+                           </div>
                         </div>
                         
                         <div className="flex space-x-2">

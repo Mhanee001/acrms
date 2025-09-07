@@ -39,6 +39,10 @@ export const useRoleAccess = () => {
     return role === 'admin' || role === 'ceo' || role === 'manager';
   };
 
+  const canManageInventory = (): boolean => {
+    return role === 'admin' || role === 'ceo' || role === 'manager';
+  };
+
   const canAccess = (allowedRoles: UserRole[]): boolean => {
     return hasRole(allowedRoles);
   };
@@ -54,6 +58,7 @@ export const useRoleAccess = () => {
     isCEO,
     isManager,
     canManageStaff,
+    canManageInventory,
     canAccess
   };
 };
