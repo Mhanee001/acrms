@@ -177,32 +177,52 @@ export const StaffManagement = () => {
 
   const fetchStaff = async () => {
     try {
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (profilesError) {
-        console.error('Error fetching profiles:', profilesError);
-        return;
-      }
-
-      // Fetch user roles separately
+      // Fetch all user roles first (this is our primary source of all users)
       const { data: rolesData, error: rolesError } = await supabase
         .from('user_roles')
-        .select('*');
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (rolesError) {
         console.error('Error fetching roles:', rolesError);
         return;
       }
 
-      // Combine profiles with their roles
-      const staffData = (profilesData || []).map(profile => {
-        const userRole = rolesData?.find(role => role.user_id === profile.id);
+      // Fetch all profiles
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*');
+
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        return;
+      }
+
+      // Create staff data starting from roles (so we don't miss anyone)
+      const staffData = (rolesData || []).map(roleRecord => {
+        const profile = profilesData?.find(p => p.id === roleRecord.user_id);
+        
         return {
-          ...profile,
-          user_roles: userRole ? [userRole] : [{ role: 'user', specialty: null }]
+          id: roleRecord.user_id,
+          first_name: profile?.first_name || 'Unknown',
+          last_name: profile?.last_name || 'User',
+          email: profile?.email || 'No email',
+          created_at: profile?.created_at || roleRecord.created_at,
+          avatar_url: profile?.avatar_url || null,
+          phone: profile?.phone || null,
+          bio: profile?.bio || null,
+          company: profile?.company || null,
+          position: profile?.position || null,
+          department: profile?.department || null,
+          location: profile?.location || null,
+          linkedin_url: profile?.linkedin_url || null,
+          emergency_contact: profile?.emergency_contact || null,
+          office_extension: profile?.office_extension || null,
+          updated_at: profile?.updated_at || roleRecord.created_at,
+          user_roles: [{ 
+            role: roleRecord.role, 
+            specialty: roleRecord.specialty 
+          }]
         };
       });
 
