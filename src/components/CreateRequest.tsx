@@ -9,6 +9,7 @@ import { Wrench } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { NotificationService } from "@/lib/notifications";
 
 interface CreateRequestProps {
   onRequestCreated?: () => void;
@@ -43,7 +44,7 @@ export const CreateRequest = ({ onRequestCreated }: CreateRequestProps) => {
     setIsCreating(true);
 
     try {
-      const { error } = await supabase
+      const { data: requestData, error } = await supabase
         .from('service_requests')
         .insert({
           user_id: user.id,
@@ -54,7 +55,9 @@ export const CreateRequest = ({ onRequestCreated }: CreateRequestProps) => {
           location: newRequest.location || null,
           required_specialty: newRequest.required_specialty || null,
           status: 'pending'
-        });
+        })
+        .select()
+        .single();
 
       if (error) {
         console.error('Error creating service request:', error);
@@ -71,7 +74,16 @@ export const CreateRequest = ({ onRequestCreated }: CreateRequestProps) => {
         user_id: user.id,
         action: 'create_request',
         description: `Created service request: ${newRequest.title}`,
-        entity_type: 'service_request'
+        entity_type: 'service_request',
+        entity_id: requestData.id
+      });
+
+      // Send notifications to admins and technicians
+      await NotificationService.notifyNewServiceRequest({
+        id: requestData.id,
+        title: newRequest.title,
+        user_id: user.id,
+        description: newRequest.description
       });
 
       toast({
