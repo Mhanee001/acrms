@@ -390,6 +390,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      log_activity: {
+        Args: {
+          p_action: string
+          p_description: string
+          p_entity_id?: string
+          p_entity_type?: string
+          p_metadata?: Json
+          p_user_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "user" | "admin" | "technician" | "sales" | "ceo" | "manager"
