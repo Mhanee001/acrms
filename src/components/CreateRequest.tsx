@@ -69,22 +69,7 @@ export const CreateRequest = ({ onRequestCreated }: CreateRequestProps) => {
         return;
       }
 
-      // Log activity
-      await supabase.from('activity_logs').insert({
-        user_id: user.id,
-        action: 'create_request',
-        description: `Created service request: ${newRequest.title}`,
-        entity_type: 'service_request',
-        entity_id: requestData.id
-      });
-
-      // Send notifications to admins and technicians
-      await NotificationService.notifyNewServiceRequest({
-        id: requestData.id,
-        title: newRequest.title,
-        user_id: user.id,
-        description: newRequest.description
-      });
+      // Activity logging and notifications are now handled automatically by database triggers
 
       toast({
         title: "Success",
